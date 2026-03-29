@@ -1,0 +1,99 @@
+{
+  "manifest_version": "0.2",
+  "name": "deslopify",
+  "version": "0.1.0",
+  "description": "A universal MCP server that acts as a code quality gate for AI assistants",
+  "author": {
+    "name": "veroxsity"
+  },
+  "server": {
+    "type": "node",
+    "entry_point": "server/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": [
+        "${__dirname}/server/index.js"
+      ],
+      "env": {}
+    }
+  },
+  "tools": [
+    {
+      "name": "get_guidance",
+      "description": "Get language-specific guidance, idioms, and pitfalls before writing code"
+    },
+    {
+      "name": "review_code",
+      "description": "Review generated code for quality issues, returns score and fix suggestions"
+    },
+    {
+      "name": "validate_approach",
+      "description": "Validate whether a proposed bug fix targets root cause or just patches a symptom"
+    },
+    {
+      "name": "suggest_tests",
+      "description": "Generate structured test cases with framework-specific skeletons"
+    },
+    {
+      "name": "check_dependencies",
+      "description": "Evaluate whether proposed dependencies are appropriate or overkill"
+    },
+    {
+      "name": "check_api_exists",
+      "description": "Verify whether an API exists in the target language and version"
+    }
+  ],
+  "prompts": [
+    {
+      "name": "pre_generation",
+      "description": "Consult Deslopify before generating any code for language-specific guidance",
+      "arguments": [
+        "language",
+        "tasks"
+      ],
+      "text": "Before writing any code for this task, call the Deslopify get_guidance tool with the language and task. Follow the returned guidance strictly — use recommended idioms, make the solution generic, implement error handling, and ensure testability. Do not proceed until you have reviewed the guidance."
+    },
+    {
+      "name": "post_generation",
+      "description": "Submit generated code to Deslopify for review before presenting to user",
+      "arguments": [
+        "language",
+        "code"
+      ],
+      "text": "Before presenting this code to the user, call the Deslopify review_code tool with language ${arguments.language} and code ${arguments.code}. If the verdict is needs_improvement or fail, address all errors, regenerate the code, and review again. Do not present code until the verdict is pass or all errors are resolved. Include suggested test cases."
+    },
+    {
+      "name": "bug_fix_validation",
+      "description": "Validate a proposed bug fix targets root cause not just the symptom",
+      "arguments": [
+        "language",
+        "problem",
+        "approach"
+      ],
+      "text": "Before implementing a fix, call the Deslopify validate_approach tool with language ${arguments.language}, problem_description ${arguments.problem}, and proposed_approach ${arguments.approach}. If the assessment is symptom_fix, do NOT proceed. Follow the recommendation to trace the root cause, ask clarifying questions, and reformulate. Only implement when assessment is root_cause_fix or likely_root_cause."
+    },
+    {
+      "name": "full_workflow",
+      "description": "Complete Deslopify workflow: guidance, validation, generation, review, tests",
+      "arguments": [
+        "language",
+        "task"
+      ],
+      "text": "Follow the complete Deslopify workflow for ${arguments.task} in ${arguments.language}: 1) Call get_guidance for language idioms. 2) If fixing a bug, call validate_approach to confirm root cause. 3) Generate code following guidance. 4) Call review_code and iterate until pass. 5) Call suggest_tests and include test cases. 6) If adding packages, call check_dependencies. Present final code, review results, and tests together."
+    }
+  ],
+  "keywords": [
+    "mcp",
+    "code-quality",
+    "ai",
+    "linter",
+    "deslopify",
+    "anti-slop",
+    "code-review"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veroxsity/deslopify"
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "anti_patterns": [
+    {
+      "id": "JV_AP001",
+      "name": "string_concatenation_loop_java",
+      "severity": "warning",
+      "category": "performance",
+      "description": "String concatenation with + in a loop creates a new String object each iteration. Use StringBuilder.",
+      "detection": "Detect string += inside for/while loops.",
+      "fix": "Use StringBuilder sb = new StringBuilder(); sb.append(...); in the loop."
+    },
+    {
+      "id": "JV_AP002",
+      "name": "raw_types",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "Using raw types (List instead of List<String>) bypasses generics and loses compile-time type checking.",
+      "detection": "Detect raw Collection types without type parameters.",
+      "fix": "Always parameterize collections: List<String>, Map<Integer, User>, etc."
+    },
+    {
+      "id": "JV_AP003",
+      "name": "catching_throwable",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Catching Throwable or Error catches JVM-level problems like OutOfMemoryError. Only catch Exception or specific subtypes.",
+      "detection": "Detect catch(Throwable) or catch(Error) blocks.",
+      "fix": "Catch Exception or specific exception types. Never catch Throwable or Error."
+    },
+    {
+      "id": "JV_AP004",
+      "name": "system_exit_in_library",
+      "severity": "error",
+      "category": "architecture",
+      "description": "System.exit() should never be called in library code. It kills the entire JVM. Throw an exception instead.",
+      "detection": "Detect System.exit() calls.",
+      "fix": "Throw an appropriate exception. Let the top-level caller decide whether to exit."
+    }
+  ]
+}

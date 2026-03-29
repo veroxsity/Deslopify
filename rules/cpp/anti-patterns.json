@@ -1,0 +1,58 @@
+{
+  "anti_patterns": [
+    {
+      "id": "CPP_AP001",
+      "name": "c_style_casts",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "C-style casts bypass type safety. Use static_cast, dynamic_cast, const_cast, or reinterpret_cast.",
+      "detection": "Detect (Type)expr patterns that aren't function calls.",
+      "fix": "Replace (int)x with static_cast<int>(x). Use dynamic_cast for polymorphic types."
+    },
+    {
+      "id": "CPP_AP002",
+      "name": "using_namespace_std",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "Avoid 'using namespace std' in headers. It pollutes the global namespace and causes name collisions.",
+      "detection": "Detect 'using namespace std' statements.",
+      "fix": "Use explicit std:: prefix or selective using declarations (using std::vector;) in .cpp files only."
+    },
+    {
+      "id": "CPP_AP003",
+      "name": "raw_c_arrays",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "Use std::array for fixed-size arrays and std::vector for dynamic arrays instead of raw C arrays.",
+      "detection": "Detect C-style array declarations: int arr[10].",
+      "fix": "Replace int arr[10] with std::array<int, 10> arr. Replace dynamic arrays with std::vector."
+    },
+    {
+      "id": "CPP_AP004",
+      "name": "raw_c_strings",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Prefer std::string and std::string_view over const char* for string handling.",
+      "detection": "Detect const char* parameter or variable declarations used for string data.",
+      "fix": "Use std::string for owned strings and std::string_view for read-only references."
+    },
+    {
+      "id": "CPP_AP005",
+      "name": "missing_noexcept",
+      "severity": "info",
+      "category": "performance",
+      "description": "Move constructors and move assignment operators should be marked noexcept for optimal container performance.",
+      "detection": "Detect move constructor/assignment without noexcept specifier.",
+      "fix": "Add noexcept to move operations: T(T&&) noexcept; T& operator=(T&&) noexcept;"
+    },
+    {
+      "id": "CPP_AP006",
+      "name": "endl_overuse",
+      "severity": "info",
+      "category": "performance",
+      "description": "std::endl flushes the buffer every time. Use '\\n' for newlines unless you specifically need a flush.",
+      "detection": "Detect std::endl in output streams.",
+      "fix": "Replace std::endl with '\\n'. Use std::endl only when you explicitly need to flush."
+    }
+  ]
+}

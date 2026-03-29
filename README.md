@@ -52,7 +52,7 @@ Or install globally:
 npm install -g deslopify
 ```
 
-### Claude Desktop
+### Claude Desktop (SSE)
 
 Add to your `claude_desktop_config.json`:
 
@@ -60,17 +60,22 @@ Add to your `claude_desktop_config.json`:
 {
   "mcpServers": {
     "deslopify": {
-      "command": "npx",
-      "args": ["-y", "deslopify"]
+      "url": "http://optiplex:7381/sse"
     }
   }
 }
 ```
 
-### Claude Code
+### Claude Code / Codex CLI (Streamable HTTP)
 
 ```bash
-claude mcp add deslopify npx deslopify
+claude mcp add deslopify --url http://optiplex:7381/mcp
+```
+
+### Remote (once DNS propagates)
+
+```bash
+claude mcp add deslopify --url https://mcp.deslopify.co.uk/mcp
 ```
 
 ## Tools

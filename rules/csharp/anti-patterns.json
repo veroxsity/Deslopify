@@ -1,0 +1,40 @@
+{
+  "anti_patterns": [
+    {
+      "id": "CS_AP001",
+      "name": "string_concatenation_loop",
+      "severity": "warning",
+      "category": "performance",
+      "description": "String concatenation in a loop creates a new string object each iteration. Use StringBuilder for repeated concatenation.",
+      "detection": "Detect += on string variables inside for/foreach/while loops.",
+      "fix": "Use StringBuilder and call .Append() inside the loop, then .ToString() after."
+    },
+    {
+      "id": "CS_AP002",
+      "name": "empty_catch_rethrow",
+      "severity": "error",
+      "category": "robustness",
+      "description": "catch { throw; } is pointless. catch (Exception ex) { throw ex; } loses the stack trace. Use throw; not throw ex;",
+      "detection": "Detect catch blocks that only contain throw ex; (losing stack trace).",
+      "fix": "Use 'throw;' to preserve the original stack trace, or remove the try/catch entirely if no handling is needed."
+    },
+    {
+      "id": "CS_AP003",
+      "name": "god_class",
+      "severity": "warning",
+      "category": "architecture",
+      "description": "Classes with too many methods or responsibilities should be decomposed. A class with 10+ public methods likely violates single responsibility.",
+      "detection": "Detect classes with excessive method count.",
+      "fix": "Split into focused classes. Extract related methods into their own service/handler classes."
+    },
+    {
+      "id": "CS_AP004",
+      "name": "magic_strings",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "String literals used for comparison, dictionary keys, or routing are fragile. Use constants, enums, or nameof().",
+      "detection": "Detect string literals in if comparisons or dictionary access.",
+      "fix": "Extract to const fields, use nameof() for property/method names, or use enums."
+    }
+  ]
+}

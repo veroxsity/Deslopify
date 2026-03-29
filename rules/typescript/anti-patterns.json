@@ -1,0 +1,49 @@
+{
+  "anti_patterns": [
+    {
+      "id": "TS_AP001",
+      "name": "non_null_assertion",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "Non-null assertion (!) bypasses TypeScript's null safety. Use proper null checks or optional chaining instead.",
+      "detection": "Detect ! used as non-null assertion operator on expressions.",
+      "fix": "Use optional chaining (?.), nullish coalescing (??), or explicit null checks."
+    },
+    {
+      "id": "TS_AP002",
+      "name": "console_log_in_production",
+      "severity": "info",
+      "category": "robustness",
+      "description": "console.log statements should not be in production code. Use a proper logging library with levels.",
+      "detection": "Detect console.log calls.",
+      "fix": "Use a logging library (winston, pino) with configurable log levels. Remove debug console.log calls."
+    },
+    {
+      "id": "TS_AP003",
+      "name": "callback_hell",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "Deeply nested callbacks make code hard to read and maintain. Use async/await or Promise chains.",
+      "detection": "Detect 3+ levels of nested callback functions.",
+      "fix": "Refactor to async/await. Extract nested callbacks into named functions."
+    },
+    {
+      "id": "TS_AP004",
+      "name": "enum_antipattern",
+      "severity": "info",
+      "category": "idiom",
+      "description": "TypeScript enums have surprising runtime behavior. Prefer const objects with 'as const' or union types.",
+      "detection": "Detect enum declarations.",
+      "fix": "Replace enum with: const STATUS = { Active: 'active', Inactive: 'inactive' } as const; type Status = typeof STATUS[keyof typeof STATUS];"
+    },
+    {
+      "id": "TS_AP005",
+      "name": "index_signature_overuse",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "Index signatures ([key: string]: any) lose type safety. Use Map<K,V>, Record<K,V>, or explicit interfaces.",
+      "detection": "Detect [key: string]: any index signatures.",
+      "fix": "Use Record<string, SpecificType>, Map<string, SpecificType>, or define proper interface properties."
+    }
+  ]
+}

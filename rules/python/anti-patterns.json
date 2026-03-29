@@ -1,0 +1,49 @@
+{
+  "anti_patterns": [
+    {
+      "id": "PY_AP001",
+      "name": "bare_except",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Bare 'except:' catches everything including SystemExit and KeyboardInterrupt. Always specify the exception type.",
+      "detection": "Detect except: without an exception class.",
+      "fix": "Use 'except Exception as e:' at minimum. Prefer catching specific exceptions."
+    },
+    {
+      "id": "PY_AP002",
+      "name": "star_import",
+      "severity": "warning",
+      "category": "architecture",
+      "description": "Wildcard imports (from module import *) pollute the namespace and make it unclear where names come from.",
+      "detection": "Detect from X import * statements.",
+      "fix": "Import specific names: from module import ClassA, function_b"
+    },
+    {
+      "id": "PY_AP003",
+      "name": "isinstance_chain",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Long chains of isinstance checks suggest missing polymorphism or pattern matching (match/case in 3.10+).",
+      "detection": "Detect 3+ consecutive isinstance checks in if/elif chains.",
+      "fix": "Use match/case (Python 3.10+), dictionary dispatch, or polymorphism."
+    },
+    {
+      "id": "PY_AP004",
+      "name": "global_variable",
+      "severity": "warning",
+      "category": "architecture",
+      "description": "Global mutable state makes code hard to test and reason about. Pass state explicitly or use dependency injection.",
+      "detection": "Detect 'global' keyword in function bodies.",
+      "fix": "Pass the value as a function parameter. Use a class to encapsulate state."
+    },
+    {
+      "id": "PY_AP005",
+      "name": "string_format_percent",
+      "severity": "info",
+      "category": "idiom",
+      "description": "% string formatting is outdated. Use f-strings (3.6+) or str.format() for clarity and safety.",
+      "detection": "Detect '%s' % or '%d' % formatting patterns.",
+      "fix": "Replace 'Hello %s' % name with f'Hello {name}'"
+    }
+  ]
+}
