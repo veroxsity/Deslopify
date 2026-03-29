@@ -13,7 +13,7 @@ export interface DeslopifyConfig {
 export const DEFAULT_CONFIG: DeslopifyConfig = {
   strictness: "medium",
   transport: "stdio",
-  port: 3000,
+  port: 7381,
   languages: "all",
   logLevel: "info",
 };

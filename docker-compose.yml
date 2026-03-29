@@ -1,12 +1,11 @@
 services:
   deslopify:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    image: ghcr.io/veroxsity/deslopify:latest
+    container_name: deslopify
     ports:
       - "7381:7381"
     environment:
-      - DESLOPIFY_STRICTNESS=medium
       - DESLOPIFY_TRANSPORT=sse
       - DESLOPIFY_PORT=7381
+      - DESLOPIFY_STRICTNESS=medium
     restart: unless-stopped
