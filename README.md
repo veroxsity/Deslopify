@@ -4,7 +4,7 @@
 
 A universal [MCP](https://modelcontextprotocol.io) server that acts as a code quality gate for AI assistants. Deslopify gives AI coding tools pre-generation guidance, post-generation review, and root cause analysis — so the code you get is idiomatic, generic, tested, and actually fixes the right problem.
 
-🌐 [deslopify.dev](https://deslopify.dev) · 📦 [npm](https://www.npmjs.com/package/deslopify) · 🐙 [GitHub](https://github.com/veroxsity/deslopify)
+🌐 [deslopify.co.uk](https://deslopify.co.uk) · 📦 [npm](https://www.npmjs.com/package/deslopify) · 🐙 [GitHub](https://github.com/veroxsity/deslopify)
 
 ## The Problem
 
