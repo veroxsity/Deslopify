@@ -1,6 +1,6 @@
 services:
   deslopify:
-    image: ghcr.io/veroxsity/deslopify:latest
+    image: veroxsity/deslopify:latest
     container_name: deslopify
     ports:
       - "7381:7381"
