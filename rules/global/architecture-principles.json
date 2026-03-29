@@ -1,0 +1,24 @@
+{
+  "principles": [
+    {
+      "id": "A001",
+      "name": "single_responsibility",
+      "description": "Each module/class/function should have one reason to change. If a function does parsing AND validation AND saving, split it."
+    },
+    {
+      "id": "A002",
+      "name": "no_god_classes",
+      "description": "No class should handle more than one domain concept. If a class has 10+ methods spanning multiple concerns, decompose it."
+    },
+    {
+      "id": "A003",
+      "name": "dependency_direction",
+      "description": "Dependencies should point inward — business logic should not depend on infrastructure. Use interfaces at boundaries."
+    },
+    {
+      "id": "A004",
+      "name": "prefer_composition",
+      "description": "Prefer composition over inheritance. Inheritance creates tight coupling. Compose behaviour from small, focused components."
+    }
+  ]
+}

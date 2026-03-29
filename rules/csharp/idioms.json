@@ -1,0 +1,83 @@
+{
+  "language": "csharp",
+  "version": "1.0.0",
+  "idioms": [
+    {
+      "id": "CS001",
+      "name": "use_using_disposable",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Always use 'using' declarations or statements for IDisposable objects. Never manually call Dispose().",
+      "detection": "Detect IDisposable objects created without using statements. Detect manual Dispose() calls in finally blocks.",
+      "fix": "Wrap in using declaration (C# 8+) or using statement.",
+      "bad_example": "var stream = new FileStream(path, FileMode.Open);\ntry { ... } finally { stream.Dispose(); }",
+      "good_example": "using var stream = new FileStream(path, FileMode.Open);"
+    },
+    {
+      "id": "CS002",
+      "name": "async_await_properly",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Use async/await consistently. Never use .Result or .Wait() on tasks — they cause deadlocks. Always suffix async methods with Async.",
+      "detection": "Detect .Result, .Wait(), .GetAwaiter().GetResult() calls on Task. Detect async void methods (except event handlers).",
+      "fix": "Await the task. Make the calling method async. Use async Task not async void.",
+      "bad_example": "var result = GetDataAsync().Result;",
+      "good_example": "var result = await GetDataAsync();"
+    },
+    {
+      "id": "CS003",
+      "name": "nullable_reference_types",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "Enable nullable reference types and annotate nullability. Check for null before dereferencing nullable types.",
+      "detection": "Detect missing null checks on nullable parameters. Detect disabled nullable context.",
+      "fix": "Enable <Nullable>enable</Nullable> in csproj. Annotate nullable params with ?. Use null-conditional and null-coalescing operators.",
+      "bad_example": "string GetName(User user) { return user.Name.ToUpper(); }",
+      "good_example": "string GetName(User? user) { return user?.Name?.ToUpper() ?? string.Empty; }"
+    },
+    {
+      "id": "CS004",
+      "name": "use_pattern_matching",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Use C# pattern matching (is, switch expressions, property patterns) instead of verbose type checks and casts.",
+      "detection": "Detect (x is Type) followed by cast. Detect verbose switch statements that could be switch expressions.",
+      "fix": "Use 'is Type t' pattern, switch expressions, property patterns.",
+      "bad_example": "if (shape is Circle) { var c = (Circle)shape; return c.Radius; }",
+      "good_example": "if (shape is Circle c) { return c.Radius; }"
+    },
+    {
+      "id": "CS005",
+      "name": "prefer_linq",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Prefer LINQ for collection transformations over manual loops. Use method syntax for simple queries.",
+      "detection": "Detect foreach loops building new lists via Add() that could be Select/Where/Aggregate.",
+      "fix": "Replace with LINQ methods: Select, Where, Aggregate, Any, All, FirstOrDefault.",
+      "bad_example": "var names = new List<string>(); foreach (var u in users) names.Add(u.Name);",
+      "good_example": "var names = users.Select(u => u.Name).ToList();"
+    },
+    {
+      "id": "CS006",
+      "name": "use_dependency_injection",
+      "severity": "warning",
+      "category": "testability",
+      "description": "Use constructor injection for dependencies. Register services in DI container rather than newing up dependencies.",
+      "detection": "Detect new ServiceClass() inside business logic. Detect static service locator patterns.",
+      "fix": "Inject via constructor. Register in IServiceCollection. Use interfaces for mockability.",
+      "bad_example": "public class OrderService { public void Process() { var db = new SqlDatabase(); } }",
+      "good_example": "public class OrderService { private readonly IDatabase _db; public OrderService(IDatabase db) { _db = db; } }"
+    },
+    {
+      "id": "CS007",
+      "name": "use_records_for_data",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Use record types for immutable data transfer objects. Records provide value equality and with-expressions.",
+      "detection": "Detect classes with only auto-properties and no behaviour that could be records.",
+      "fix": "Convert to record or record struct for value semantics.",
+      "bad_example": "public class Point { public int X { get; set; } public int Y { get; set; } }",
+      "good_example": "public record Point(int X, int Y);"
+    }
+  ]
+}

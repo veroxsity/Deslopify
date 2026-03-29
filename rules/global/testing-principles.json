@@ -1,0 +1,29 @@
+{
+  "principles": [
+    {
+      "id": "T001",
+      "name": "test_edge_cases",
+      "description": "Always test edge cases: empty input, null input, single element, boundary values, max/min values."
+    },
+    {
+      "id": "T002",
+      "name": "test_error_paths",
+      "description": "Test error/exception paths with equal rigour to happy paths. Every catch block should have a corresponding test."
+    },
+    {
+      "id": "T003",
+      "name": "test_in_isolation",
+      "description": "Unit tests should test one thing. Mock external dependencies. No shared mutable state between tests."
+    },
+    {
+      "id": "T004",
+      "name": "test_names_describe_behaviour",
+      "description": "Test names should describe the expected behaviour, not the implementation: test_returns_empty_for_null_input not test_function_1."
+    },
+    {
+      "id": "T005",
+      "name": "arrange_act_assert",
+      "description": "Structure tests as Arrange-Act-Assert (or Given-When-Then). One logical assertion per test."
+    }
+  ]
+}

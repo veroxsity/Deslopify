@@ -1,0 +1,47 @@
+{
+  "name": "deslopify",
+  "version": "0.1.0",
+  "description": "A universal MCP server that acts as a code quality gate for AI assistants",
+  "type": "module",
+  "bin": {
+    "deslopify": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node build/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src/",
+    "prepublishOnly": "npm run build"
+  },
+  "files": [
+    "build",
+    "rules"
+  ],
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "code-quality",
+    "ai",
+    "linter",
+    "deslopify"
+  ],
+  "author": "veroxsity",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/veroxsity/deslopify.git"
+  },
+  "homepage": "https://deslopify.dev",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^3.0.0",
+    "eslint": "^9.0.0"
+  }
+}

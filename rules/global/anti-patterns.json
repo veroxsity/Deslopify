@@ -1,0 +1,136 @@
+{
+  "rules": [
+    {
+      "id": "G001",
+      "name": "narrow_solution",
+      "severity": "warning",
+      "category": "generality",
+      "description": "Code is hardcoded to a specific type, format, or use case when a general solution is feasible.",
+      "detection": "Check if function parameters use concrete types where generics/templates/protocols could be used. Check if switch/if chains handle only one case when the domain has many.",
+      "fix": "Parameterise the type. Use generics, templates, interfaces, or union types as appropriate for the language.",
+      "bad_example": "function removeDuplicates(arr: string[]): string[] { ... }",
+      "good_example": "function removeDuplicates<T>(arr: T[]): T[] { ... }"
+    },
+    {
+      "id": "G002",
+      "name": "symptom_patching",
+      "severity": "error",
+      "category": "robustness",
+      "description": "A bug fix modifies a leaf module when the root cause is in a shared caller or base class.",
+      "detection": "Compare the proposed change location against the call chain. If the change is at the end and the problem suggests broader impact, flag it.",
+      "fix": "Trace the call chain upward. Identify the shared point where the bug originates. Fix at that level.",
+      "bad_example": "Fixing RedstoneHandler.activate() when UseItem.execute() passes wrong context to all handlers.",
+      "good_example": "Fixing UseItem.execute() to pass correct interaction context, resolving issues for all item types."
+    },
+    {
+      "id": "G003",
+      "name": "exception_swallowing",
+      "severity": "error",
+      "category": "robustness",
+      "description": "A catch/except block catches an exception and does nothing, only logs, or returns a default without recovery.",
+      "detection": "Identify catch blocks with empty bodies, log-only bodies, or return null/default without context.",
+      "fix": "Either handle the exception meaningfully (retry, fallback) or let it propagate. If logging, also re-throw.",
+      "bad_example": "try { ... } catch (e) { console.log(e); return null; }",
+      "good_example": "try { ... } catch (e) { logger.error('Context:', e); throw new AppError('Operation failed', { cause: e }); }"
+    },
+    {
+      "id": "G004",
+      "name": "hallucinated_api",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Code references a function, method, class, or module that does not exist in the target language or version.",
+      "detection": "Cross-reference API calls against known standard library surfaces for the target version.",
+      "fix": "Use the correct API for the target version, or implement the missing functionality manually.",
+      "bad_example": "std::ranges::to<vector>(range) // Does not exist in C++20",
+      "good_example": "std::vector<int> v(range.begin(), range.end()); // Works in C++20"
+    },
+    {
+      "id": "G005",
+      "name": "copy_paste_duplication",
+      "severity": "warning",
+      "category": "architecture",
+      "description": "The same logic appears in two or more places with minor variations.",
+      "detection": "Identify repeated code blocks with >70% structural similarity.",
+      "fix": "Extract a shared function parameterised by the differences.",
+      "bad_example": "function processUserOrder() { validate(); save(); notify(); }\nfunction processAdminOrder() { validate(); save(); notify(); }",
+      "good_example": "function processOrder(role: Role) { validate(); save(); notify(role); }"
+    },
+    {
+      "id": "G006",
+      "name": "hardcoded_configuration",
+      "severity": "warning",
+      "category": "architecture",
+      "description": "Magic numbers, hardcoded file paths, embedded credentials, or environment-specific values in source code.",
+      "detection": "Identify literal values that should be configuration: paths, URLs, port numbers, credentials, thresholds.",
+      "fix": "Extract to configuration (environment variables, config file, named constants).",
+      "bad_example": "const url = 'http://localhost:3000/api';",
+      "good_example": "const url = process.env.API_URL ?? config.apiUrl;"
+    },
+    {
+      "id": "G007",
+      "name": "missing_error_paths",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Code only handles the happy path with no input validation or failure handling.",
+      "detection": "Check function entry points for input validation. Check external calls for error handling.",
+      "fix": "Add input validation at function entry. Add error handling around all external calls.",
+      "bad_example": "function divide(a, b) { return a / b; }",
+      "good_example": "function divide(a: number, b: number): number { if (b === 0) throw new Error('Division by zero'); return a / b; }"
+    },
+    {
+      "id": "G008",
+      "name": "untestable_structure",
+      "severity": "warning",
+      "category": "testability",
+      "description": "Code cannot be unit tested without modification due to hidden deps, static calls, or constructor side effects.",
+      "detection": "Identify direct instantiation of service dependencies inside business logic. Identify static I/O calls. Identify constructor side effects.",
+      "fix": "Inject dependencies via constructor or method parameters. Wrap static calls behind interfaces.",
+      "bad_example": "class OrderService { process() { const db = new Database(); db.save(this.order); } }",
+      "good_example": "class OrderService { constructor(private db: IDatabase) {} process() { this.db.save(this.order); } }"
+    },
+    {
+      "id": "G009",
+      "name": "over_engineering",
+      "severity": "info",
+      "category": "architecture",
+      "description": "Code applies patterns, abstractions, or indirection that current requirements do not justify.",
+      "detection": "Count layers of indirection relative to concrete implementations. Flag patterns with only one implementation.",
+      "fix": "Simplify. Apply patterns when there's a concrete need, not speculatively.",
+      "bad_example": "AbstractFactoryBuilderStrategyProvider for creating one simple config object.",
+      "good_example": "function createConfig(opts: ConfigOptions): Config { ... }"
+    },
+    {
+      "id": "G010",
+      "name": "dependency_bloat",
+      "severity": "warning",
+      "category": "architecture",
+      "description": "A large library is imported for trivial functionality.",
+      "detection": "Cross-reference imported packages against usage. Flag where <3 exports are used and functionality is trivially implementable.",
+      "fix": "Implement the needed functionality directly, or use a smaller focused package.",
+      "bad_example": "import _ from 'lodash'; // only using _.get()",
+      "good_example": "const get = (obj, path) => path.split('.').reduce((o, k) => o?.[k], obj);"
+    },
+    {
+      "id": "G011",
+      "name": "ignoring_language_conventions",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "Code written in language B using patterns from language A.",
+      "detection": "Pattern match against known cross-language anti-patterns per language pair.",
+      "fix": "Rewrite using the target language's idiomatic approach.",
+      "bad_example": "# Python with Java-style getters\ndef getName(self): return self._name",
+      "good_example": "# Python @property\n@property\ndef name(self): return self._name"
+    },
+    {
+      "id": "G012",
+      "name": "repetitive_boilerplate",
+      "severity": "info",
+      "category": "generality",
+      "description": "Large amounts of repetitive boilerplate that could be eliminated with language features.",
+      "detection": "Identify structurally identical blocks differing only in names or types.",
+      "fix": "Use the language's abstraction mechanisms (generics, macros, decorators, metaprogramming).",
+      "bad_example": "function parseString(v) { ... }\nfunction parseInt(v) { ... }\nfunction parseFloat(v) { ... }",
+      "good_example": "function parse<T>(v: unknown, parser: Parser<T>): T { ... }"
+    }
+  ]
+}

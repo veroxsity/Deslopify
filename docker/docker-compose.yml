@@ -1,0 +1,12 @@
+services:
+  deslopify:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DESLOPIFY_STRICTNESS=medium
+      - DESLOPIFY_TRANSPORT=sse
+      - DESLOPIFY_PORT=3000
+    restart: unless-stopped

@@ -1,0 +1,83 @@
+{
+  "language": "python",
+  "version": "1.0.0",
+  "idioms": [
+    {
+      "id": "PY001",
+      "name": "use_context_managers",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Use 'with' statements for all resources that support context managers — files, locks, connections, sessions.",
+      "detection": "Detect file open() without with statement. Detect manual close() calls. Detect try/finally for resource cleanup.",
+      "fix": "Wrap in with statement. Implement __enter__/__exit__ for custom resource types.",
+      "bad_example": "f = open('data.txt')\ntry:\n    data = f.read()\nfinally:\n    f.close()",
+      "good_example": "with open('data.txt') as f:\n    data = f.read()"
+    },
+    {
+      "id": "PY002",
+      "name": "use_type_hints",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "Add type hints to all function signatures and class attributes. Use modern syntax (X | None instead of Optional[X]).",
+      "detection": "Detect functions without type annotations. Detect use of typing.Optional instead of X | None (3.10+).",
+      "fix": "Add type hints to parameters and return types. Use built-in generics (list[int] not List[int]).",
+      "bad_example": "def process(items, threshold):\n    return [i for i in items if i > threshold]",
+      "good_example": "def process(items: list[float], threshold: float) -> list[float]:\n    return [i for i in items if i > threshold]"
+    },
+    {
+      "id": "PY003",
+      "name": "use_dataclasses",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Use @dataclass for data containers instead of plain classes with manual __init__. Use frozen=True for immutable data.",
+      "detection": "Detect classes whose __init__ only assigns self.x = x for multiple attributes.",
+      "fix": "Convert to @dataclass. Use frozen=True for value objects.",
+      "bad_example": "class Point:\n    def __init__(self, x, y):\n        self.x = x\n        self.y = y",
+      "good_example": "@dataclass(frozen=True)\nclass Point:\n    x: float\n    y: float"
+    },
+    {
+      "id": "PY004",
+      "name": "no_mutable_defaults",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Never use mutable default arguments (list, dict, set). They persist across calls.",
+      "detection": "Detect def f(x=[]) or def f(x={}) or def f(x=set()) patterns.",
+      "fix": "Use None as default and create fresh mutable inside the function.",
+      "bad_example": "def add_item(item, items=[]):\n    items.append(item)\n    return items",
+      "good_example": "def add_item(item, items: list | None = None) -> list:\n    if items is None:\n        items = []\n    items.append(item)\n    return items"
+    },
+    {
+      "id": "PY005",
+      "name": "use_pathlib",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Use pathlib.Path instead of os.path for file path manipulation.",
+      "detection": "Detect os.path.join, os.path.exists, os.path.dirname usage.",
+      "fix": "Replace with Path() operations: Path(a) / b, path.exists(), path.parent.",
+      "bad_example": "import os\npath = os.path.join(base, 'data', 'file.txt')",
+      "good_example": "from pathlib import Path\npath = Path(base) / 'data' / 'file.txt'"
+    },
+    {
+      "id": "PY006",
+      "name": "use_generators",
+      "severity": "info",
+      "category": "performance",
+      "description": "Use generators and iterators for large sequences instead of building entire lists in memory.",
+      "detection": "Detect functions that build large lists and return them when yielding would work.",
+      "fix": "Replace return with yield. Use generator expressions instead of list comprehensions for large data.",
+      "bad_example": "def get_lines(path):\n    result = []\n    with open(path) as f:\n        for line in f:\n            result.append(line.strip())\n    return result",
+      "good_example": "def get_lines(path):\n    with open(path) as f:\n        for line in f:\n            yield line.strip()"
+    },
+    {
+      "id": "PY007",
+      "name": "use_properties",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "Use @property instead of Java-style getX()/setX() methods.",
+      "detection": "Detect get_* / set_* method pairs that access private attributes.",
+      "fix": "Replace with @property decorator and optional @x.setter.",
+      "bad_example": "class User:\n    def get_name(self): return self._name\n    def set_name(self, v): self._name = v",
+      "good_example": "class User:\n    @property\n    def name(self) -> str: return self._name\n    @name.setter\n    def name(self, v: str): self._name = v"
+    }
+  ]
+}

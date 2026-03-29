@@ -1,0 +1,83 @@
+{
+  "language": "cpp",
+  "version": "1.0.0",
+  "idioms": [
+    {
+      "id": "CPP001",
+      "name": "use_smart_pointers",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Use std::unique_ptr for sole ownership and std::shared_ptr only when ownership is genuinely shared. Never use raw new/delete.",
+      "detection": "Detect raw new/delete expressions, raw pointer declarations for owned resources.",
+      "fix": "Replace with std::make_unique<T>() or std::make_shared<T>(). Use raw pointers only for non-owning observation.",
+      "bad_example": "Widget* w = new Widget(); ... delete w;",
+      "good_example": "auto w = std::make_unique<Widget>();"
+    },
+    {
+      "id": "CPP002",
+      "name": "use_raii",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Use RAII for all resource management — files, locks, sockets, memory. Destructors should release resources.",
+      "detection": "Detect manual resource acquire/release pairs without RAII wrappers. Detect bare mutex lock/unlock.",
+      "fix": "Wrap resources in RAII types. Use std::lock_guard or std::scoped_lock for mutexes.",
+      "bad_example": "mutex.lock(); doWork(); mutex.unlock();",
+      "good_example": "std::scoped_lock lock(mutex); doWork();"
+    },
+    {
+      "id": "CPP003",
+      "name": "const_correctness",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "Mark variables, parameters, and methods const wherever possible. Use constexpr for compile-time constants.",
+      "detection": "Detect non-const references/pointers that are never modified. Detect methods that don't modify state but lack const qualifier.",
+      "fix": "Add const to all variables that don't change. Add const to method signatures. Use constexpr for compile-time values.",
+      "bad_example": "int getSize() { return size_; }",
+      "good_example": "int getSize() const { return size_; }"
+    },
+    {
+      "id": "CPP004",
+      "name": "prefer_algorithms",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "Prefer STL algorithms and ranges over raw loops. std::find, std::transform, std::accumulate express intent more clearly.",
+      "detection": "Detect for/while loops that implement standard algorithm patterns (search, transform, accumulate, count, filter).",
+      "fix": "Replace manual loops with appropriate STL algorithms or C++20 ranges.",
+      "bad_example": "int sum = 0; for (int i = 0; i < v.size(); i++) sum += v[i];",
+      "good_example": "int sum = std::accumulate(v.begin(), v.end(), 0);"
+    },
+    {
+      "id": "CPP005",
+      "name": "move_semantics",
+      "severity": "warning",
+      "category": "performance",
+      "description": "Use move semantics for expensive-to-copy objects. Accept by value and move when the callee needs ownership.",
+      "detection": "Detect large object copies where moves would suffice. Detect missing std::move on rvalue-eligible transfers.",
+      "fix": "Use std::move when transferring ownership. Implement move constructors/assignment for resource-owning classes.",
+      "bad_example": "void setName(const std::string& n) { name_ = n; }",
+      "good_example": "void setName(std::string n) { name_ = std::move(n); }"
+    },
+    {
+      "id": "CPP006",
+      "name": "use_string_view",
+      "severity": "info",
+      "category": "performance",
+      "description": "Use std::string_view for read-only string parameters instead of const std::string&.",
+      "detection": "Detect const std::string& parameters that are only read, never stored.",
+      "fix": "Change parameter type to std::string_view. Only use const std::string& if the function stores the string.",
+      "bad_example": "bool startsWith(const std::string& str, const std::string& prefix)",
+      "good_example": "bool startsWith(std::string_view str, std::string_view prefix)"
+    },
+    {
+      "id": "CPP007",
+      "name": "use_auto_judiciously",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Use auto when the type is obvious from context (iterators, make_unique, casts). Avoid auto when it obscures the type.",
+      "detection": "Detect explicit type declarations for iterator types and factory returns. Also detect auto where type is completely non-obvious.",
+      "fix": "Use auto for iterators, smart pointer factories, and casts. Spell out types when clarity matters.",
+      "bad_example": "std::vector<std::pair<int, std::string>>::iterator it = map.begin();",
+      "good_example": "auto it = map.begin();"
+    }
+  ]
+}

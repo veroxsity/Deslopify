@@ -1,0 +1,72 @@
+{
+  "language": "java",
+  "version": "1.0.0",
+  "idioms": [
+    {
+      "id": "JV001",
+      "name": "use_try_with_resources",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Use try-with-resources for all AutoCloseable objects — streams, connections, readers, writers.",
+      "detection": "Detect AutoCloseable objects created without try-with-resources. Detect manual close() in finally blocks.",
+      "fix": "Wrap in try-with-resources statement.",
+      "bad_example": "InputStream is = new FileInputStream(f);\ntry { ... } finally { is.close(); }",
+      "good_example": "try (var is = new FileInputStream(f)) { ... }"
+    },
+    {
+      "id": "JV002",
+      "name": "use_optional_properly",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "Use Optional for return types that may be absent. Never use Optional as a field or method parameter.",
+      "detection": "Detect methods returning null where Optional would be appropriate. Detect Optional used as field type or parameter.",
+      "fix": "Return Optional.ofNullable() instead of null. Use orElse/orElseGet/map/flatMap to unwrap.",
+      "bad_example": "public User findUser(int id) { ... return null; }",
+      "good_example": "public Optional<User> findUser(int id) { ... return Optional.ofNullable(user); }"
+    },
+    {
+      "id": "JV003",
+      "name": "use_records",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Use Java records (16+) for immutable data carriers instead of classes with boilerplate getters, equals, hashCode.",
+      "detection": "Detect classes with only final fields, getters, equals/hashCode, toString, and no behaviour.",
+      "fix": "Convert to record type.",
+      "bad_example": "public class Point { private final int x; private final int y; public Point(int x, int y) { this.x = x; this.y = y; } ... }",
+      "good_example": "public record Point(int x, int y) {}"
+    },
+    {
+      "id": "JV004",
+      "name": "use_stream_api",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Use the Stream API for collection transformations instead of imperative loops with temporary lists.",
+      "detection": "Detect for loops building new collections via add() where stream map/filter/collect would work.",
+      "fix": "Replace with stream().map().filter().collect(). Use Collectors.toList() or toUnmodifiableList().",
+      "bad_example": "List<String> names = new ArrayList<>();\nfor (User u : users) { names.add(u.getName()); }",
+      "good_example": "var names = users.stream().map(User::getName).toList();"
+    },
+    {
+      "id": "JV005",
+      "name": "use_switch_expressions",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Use switch expressions (14+) with arrow syntax and exhaustiveness checking instead of traditional switch statements.",
+      "detection": "Detect traditional switch with break statements that could be switch expressions.",
+      "fix": "Convert to switch expression with -> syntax. Use sealed types for exhaustive matching.",
+      "bad_example": "switch (day) { case MON: result = 1; break; case TUE: result = 2; break; default: result = 0; }",
+      "good_example": "var result = switch (day) { case MON -> 1; case TUE -> 2; default -> 0; };"
+    },
+    {
+      "id": "JV006",
+      "name": "no_checked_exception_abuse",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "Don't declare checked exceptions on every method. Use unchecked exceptions for programming errors, checked only for recoverable conditions.",
+      "detection": "Detect methods throwing Exception or multiple unrelated checked exceptions. Detect catch blocks that just wrap and rethrow.",
+      "fix": "Use unchecked exceptions (IllegalArgumentException, IllegalStateException) for bugs. Reserve checked exceptions for genuinely recoverable situations.",
+      "bad_example": "public void process(String s) throws Exception { ... }",
+      "good_example": "public void process(String s) { if (s == null) throw new IllegalArgumentException(\"s must not be null\"); }"
+    }
+  ]
+}

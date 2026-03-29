@@ -1,0 +1,72 @@
+{
+  "language": "typescript",
+  "version": "1.0.0",
+  "idioms": [
+    {
+      "id": "TS001",
+      "name": "no_any_leakage",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Never use 'any' type. Use 'unknown' for truly unknown values and narrow with type guards.",
+      "detection": "Detect explicit 'any' annotations. Detect implicit any from missing types. Detect 'as any' casts.",
+      "fix": "Replace any with unknown + type guard, or with a proper type/interface. Enable strict and noImplicitAny.",
+      "bad_example": "function parse(data: any) { return data.name; }",
+      "good_example": "function parse(data: unknown): string {\n  if (typeof data === 'object' && data !== null && 'name' in data) {\n    return String((data as {name: unknown}).name);\n  }\n  throw new Error('Invalid data');\n}"
+    },
+    {
+      "id": "TS002",
+      "name": "use_discriminated_unions",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "Use discriminated unions for state machines and variant types instead of optional fields or type assertions.",
+      "detection": "Detect interfaces with many optional fields representing different states. Detect type assertions to narrow unions.",
+      "fix": "Create a discriminated union with a literal type discriminant field.",
+      "bad_example": "interface Result { data?: string; error?: Error; loading?: boolean; }",
+      "good_example": "type Result =\n  | { status: 'loading' }\n  | { status: 'success'; data: string }\n  | { status: 'error'; error: Error };"
+    },
+    {
+      "id": "TS003",
+      "name": "async_error_handling",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Always handle promise rejections. Use try/catch with async/await. Never leave promises unhandled.",
+      "detection": "Detect async calls without await or .catch(). Detect missing try/catch around awaited operations.",
+      "fix": "Wrap await calls in try/catch. Use .catch() for fire-and-forget promises. Add global unhandledRejection handler.",
+      "bad_example": "async function load() { const data = await fetch(url); return data.json(); }",
+      "good_example": "async function load() {\n  const res = await fetch(url);\n  if (!res.ok) throw new Error(`HTTP ${res.status}`);\n  return res.json();\n}"
+    },
+    {
+      "id": "TS004",
+      "name": "no_as_casts",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "Avoid 'as' type assertions. They bypass type checking. Use type guards, satisfies, or schema validation instead.",
+      "detection": "Detect 'as Type' expressions, especially 'as any' and double assertions.",
+      "fix": "Use type guards (is), satisfies operator, or runtime validation (zod, io-ts).",
+      "bad_example": "const user = JSON.parse(body) as User;",
+      "good_example": "const user = UserSchema.parse(JSON.parse(body));"
+    },
+    {
+      "id": "TS005",
+      "name": "use_strict_mode",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Enable strict mode in tsconfig.json. This enables noImplicitAny, strictNullChecks, and all strict family checks.",
+      "detection": "Detect tsconfig.json without strict: true. Detect strictNullChecks: false.",
+      "fix": "Set strict: true in compilerOptions.",
+      "bad_example": "{ \"compilerOptions\": { \"strict\": false } }",
+      "good_example": "{ \"compilerOptions\": { \"strict\": true } }"
+    },
+    {
+      "id": "TS006",
+      "name": "prefer_readonly",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Use readonly for properties that shouldn't change after initialisation. Use Readonly<T> for immutable object types.",
+      "detection": "Detect class properties and interface fields that are only assigned in constructor but lack readonly.",
+      "fix": "Add readonly modifier. Use Readonly<T> and ReadonlyArray<T> for immutable structures.",
+      "bad_example": "class Config { host: string; port: number; constructor(h: string, p: number) { this.host = h; this.port = p; } }",
+      "good_example": "class Config { constructor(readonly host: string, readonly port: number) {} }"
+    }
+  ]
+}
