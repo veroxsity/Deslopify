@@ -6,6 +6,7 @@ import { registerValidateApproach } from "./tools/validate-approach.js";
 import { registerSuggestTests } from "./tools/suggest-tests.js";
 import { registerCheckDependencies } from "./tools/check-dependencies.js";
 import { registerCheckApiExists } from "./tools/check-api-exists.js";
+import { registerReviewCodebase } from "./tools/review-codebase.js";
 import { registerPreGenerationPrompt } from "./prompts/pre-generation.js";
 import { registerPostGenerationPrompt } from "./prompts/post-generation.js";
 import { registerBugFixPrompt } from "./prompts/bug-fix-validation.js";
@@ -20,13 +21,14 @@ export function createServer(): McpServer {
 
   const analyser = new StaticAnalyser();
 
-  // Register all 6 tools
+  // Register all 7 tools
   registerGetGuidance(server, analyser);
   registerReviewCode(server, analyser);
   registerValidateApproach(server);
   registerSuggestTests(server);
   registerCheckDependencies(server);
   registerCheckApiExists(server);
+  registerReviewCodebase(server, analyser);
 
   // Register all 4 prompts
   registerPreGenerationPrompt(server);

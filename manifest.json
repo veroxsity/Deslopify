@@ -41,6 +41,10 @@
     {
       "name": "check_api_exists",
       "description": "Verify whether an API exists in the target language and version"
+    },
+    {
+      "name": "review_codebase",
+      "description": "Review an entire codebase for quality issues, returns per-file scores, overall score, worst files, and most common issues"
     }
   ],
   "prompts": [

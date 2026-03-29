@@ -1,0 +1,47 @@
+# Dev dependencies (not needed at runtime)
+node_modules/typescript/
+node_modules/vitest/
+node_modules/vite/
+node_modules/vite-node/
+node_modules/eslint/
+node_modules/eslint-scope/
+node_modules/eslint-visitor-keys/
+node_modules/espree/
+node_modules/esquery/
+node_modules/esrecurse/
+node_modules/estraverse/
+node_modules/esutils/
+node_modules/@eslint/
+node_modules/@eslint-community/
+node_modules/@vitest/
+node_modules/@types/
+node_modules/@rollup/
+node_modules/esbuild/
+node_modules/@esbuild/
+node_modules/rollup/
+node_modules/postcss/
+
+# Source (build output is sufficient)
+src/
+
+# Tests
+tests/
+testcode/
+
+# Docker
+Dockerfile
+docker-compose.yml
+docker/
+
+# Design doc
+DESIGN.md
+
+# Git
+.git/
+.github/
+
+# Config files not needed at runtime
+tsconfig.json
+vitest.config.ts
+.gitignore
+.mcpbignore
