@@ -6,6 +6,8 @@ import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
 import express from "express";
 import { randomUUID } from "node:crypto";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
 import { createServer } from "./server.js";
 import { loadConfig } from "./types/config.js";
 
@@ -126,21 +128,21 @@ async function main(): Promise<void> {
       await transport.handlePostMessage(req, res);
     });
 
-    // ── Health check ──
-    app.get("/", (_req, res) => {
+    // ── Health check (moved to /api/health) ──
+    app.get("/api/health", (_req, res) => {
       res.json({
         name: "deslopify",
         version: "0.1.0",
         status: "running",
-        description: "Universal MCP code quality gate for AI assistants",
         sessions: { streamable: streamableSessions.size, sse: sseTransports.size },
-        endpoints: {
-          streamableHttp: "/mcp",
-          sse: "/sse",
-          messages: "/messages",
-        },
+        endpoints: { streamableHttp: "/mcp", sse: "/sse", health: "/api/health" },
       });
     });
+
+    // ── Static landing page ──
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = dirname(__filename);
+    app.use(express.static(join(__dirname, "..", "public")));
 
     app.listen(config.port, "0.0.0.0", () => {
       console.error(`Deslopify running on http://0.0.0.0:${config.port}`);

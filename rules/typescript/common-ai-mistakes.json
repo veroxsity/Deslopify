@@ -1,0 +1,49 @@
+{
+  "common_ai_mistakes": [
+    {
+      "id": "TS_AI001",
+      "name": "unnecessary_type_assertion",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "AI frequently uses 'as Type' instead of proper type guards or schema validation. This bypasses TypeScript's type system.",
+      "detection": "Detect as assertions on JSON.parse results or API responses.",
+      "fix": "Use zod, io-ts, or manual type guards to validate at runtime."
+    },
+    {
+      "id": "TS_AI002",
+      "name": "empty_interface",
+      "severity": "info",
+      "category": "idiom",
+      "description": "AI sometimes creates empty interfaces or interfaces extending only one other. Use type aliases instead.",
+      "detection": "Detect interface declarations with no properties or extending only one interface.",
+      "fix": "Replace empty interface with type alias: type MyType = BaseType;"
+    },
+    {
+      "id": "TS_AI003",
+      "name": "object_type_instead_of_record",
+      "severity": "info",
+      "category": "idiom",
+      "description": "AI uses { [key: string]: value } instead of Record<string, value>. Record is cleaner and more idiomatic.",
+      "detection": "Detect index signature objects that could be Record types.",
+      "fix": "Replace { [key: string]: T } with Record<string, T>."
+    },
+    {
+      "id": "TS_AI004",
+      "name": "unnecessary_async",
+      "severity": "info",
+      "category": "idiom",
+      "description": "AI marks functions as async when they don't use await. A function that returns a Promise without awaiting doesn't need async.",
+      "detection": "Detect async functions with no await keyword inside.",
+      "fix": "Remove async keyword if the function never uses await. Just return the Promise directly."
+    },
+    {
+      "id": "TS_AI005",
+      "name": "relative_import_hell",
+      "severity": "info",
+      "category": "architecture",
+      "description": "AI generates deeply nested relative imports (../../../../). Use path aliases in tsconfig.",
+      "detection": "Detect import paths with 3+ levels of ../",
+      "fix": "Configure paths in tsconfig.json: { \"@/*\": [\"src/*\"] }. Use import { x } from '@/module'."
+    }
+  ]
+}

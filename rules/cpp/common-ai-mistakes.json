@@ -1,0 +1,40 @@
+{
+  "common_ai_mistakes": [
+    {
+      "id": "CPP_AI001",
+      "name": "include_everything",
+      "severity": "info",
+      "category": "architecture",
+      "description": "AI often includes unnecessary headers. Only include what you use. Use forward declarations to reduce compile-time dependencies.",
+      "detection": "Detect large numbers of includes that may be unnecessary.",
+      "fix": "Remove unused includes. Use forward declarations in headers. Include what you use, nothing more."
+    },
+    {
+      "id": "CPP_AI002",
+      "name": "unnecessary_this",
+      "severity": "info",
+      "category": "idiom",
+      "description": "AI often uses this-> in C++ where it's not needed. Only use this-> to disambiguate from local variables.",
+      "detection": "Detect this-> usage where member name doesn't shadow a local.",
+      "fix": "Remove unnecessary this-> prefix. Use it only when a parameter shadows a member name."
+    },
+    {
+      "id": "CPP_AI003",
+      "name": "iostream_for_logging",
+      "severity": "warning",
+      "category": "architecture",
+      "description": "AI defaults to std::cout for logging. Production code should use a proper logging library with levels, timestamps, and output control.",
+      "detection": "Detect std::cout usage for logging/debugging in non-trivial code.",
+      "fix": "Use spdlog, glog, or a custom logging wrapper with severity levels."
+    },
+    {
+      "id": "CPP_AI004",
+      "name": "string_by_value_return",
+      "severity": "info",
+      "category": "performance",
+      "description": "AI sometimes worries about returning std::string by value. Modern C++ has RVO/NRVO — returning by value is fine and idiomatic.",
+      "detection": "Detect code that avoids returning string by value (using out params instead).",
+      "fix": "Return std::string by value. The compiler applies RVO/NRVO to eliminate the copy."
+    }
+  ]
+}

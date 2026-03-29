@@ -1,0 +1,40 @@
+{
+  "common_ai_mistakes": [
+    {
+      "id": "PY_AI001",
+      "name": "unnecessary_list_comprehension",
+      "severity": "info",
+      "category": "idiom",
+      "description": "AI wraps generators in list() or uses [x for x in iterable] when the iterable is already a list. Also uses list comprehension just to filter when a generator expression would save memory.",
+      "detection": "Detect list(x for x in ...) or [x for x in iterable] patterns.",
+      "fix": "Use the iterable directly, or generator expressions for large datasets."
+    },
+    {
+      "id": "PY_AI002",
+      "name": "manual_string_building",
+      "severity": "info",
+      "category": "idiom",
+      "description": "AI builds strings with + concatenation in loops instead of using join() or f-strings.",
+      "detection": "Detect string += in loops.",
+      "fix": "Use ''.join(parts) for building from a list, or f-strings for interpolation."
+    },
+    {
+      "id": "PY_AI003",
+      "name": "dict_get_with_none_default",
+      "severity": "info",
+      "category": "idiom",
+      "description": "AI uses dict.get(key, None) when None is already the default. Also uses if key in dict: dict[key] instead of dict.get(key).",
+      "detection": "Detect .get(key, None) calls.",
+      "fix": "Just use dict.get(key) — None is the default. Use dict.get(key, default) only for non-None defaults."
+    },
+    {
+      "id": "PY_AI004",
+      "name": "unnecessary_else_after_return",
+      "severity": "info",
+      "category": "idiom",
+      "description": "AI puts code in else blocks after if blocks that return. The else is unnecessary — the code after the if already only runs if the condition was false.",
+      "detection": "Detect if/return/else patterns where else is unnecessary.",
+      "fix": "Remove the else, dedent the code. if condition: return x\\nresult = y is cleaner."
+    }
+  ]
+}

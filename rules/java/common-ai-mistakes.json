@@ -1,0 +1,31 @@
+{
+  "common_ai_mistakes": [
+    {
+      "id": "JV_AI001",
+      "name": "unnecessary_boxing",
+      "severity": "info",
+      "category": "performance",
+      "description": "AI uses Integer, Long, Double wrapper types when primitives (int, long, double) would suffice. Wrappers cause unnecessary boxing.",
+      "detection": "Detect Integer/Long/Double variable declarations in non-generic contexts.",
+      "fix": "Use primitive types (int, long, double) unless generics require wrapper types."
+    },
+    {
+      "id": "JV_AI002",
+      "name": "verbose_null_checks",
+      "severity": "info",
+      "category": "idiom",
+      "description": "AI writes verbose null-check chains instead of using Objects.requireNonNull, Optional, or pattern matching.",
+      "detection": "Detect chains of if (x != null) { if (x.y != null) { ... } }.",
+      "fix": "Use Optional.ofNullable(x).map(X::getY).orElse(default) or Objects.requireNonNull()."
+    },
+    {
+      "id": "JV_AI003",
+      "name": "mutable_collections_exposed",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "AI returns mutable internal collections directly, allowing callers to modify the object's state. Return unmodifiable views instead.",
+      "detection": "Detect methods returning internal List/Set/Map fields directly.",
+      "fix": "Return Collections.unmodifiableList(internalList) or List.copyOf(internalList)."
+    }
+  ]
+}

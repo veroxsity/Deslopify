@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Deslopify — Stop AI Slop at the Source</title>
+  <meta name="description" content="A universal MCP server that acts as a code quality gate for AI assistants. Pre-generation guidance, post-generation review, and root cause analysis across C++, C#, Python, Java, and TypeScript.">
+  <meta property="og:title" content="Deslopify — Stop AI Slop at the Source">
+  <meta property="og:description" content="Universal MCP code quality gate for AI assistants">
+  <meta property="og:type" content="website">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Outfit:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07070a;
+      --surface: #0e0e13;
+      --surface-2: #151519;
+      --border: #22222e;
+      --text: #d8d8e4;
+      --text-dim: #6a6a82;
+      --accent: #22d67a;
+      --accent-glow: rgba(34, 214, 122, 0.15);
+      --red: #f04848;
+      --amber: #f0a030;
+      --font-display: 'Outfit', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-display);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    .grain {
+      position: fixed; inset: 0; z-index: 9999; pointer-events: none; opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code, .mono { font-family: var(--font-mono); }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1rem 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      background: rgba(7,7,10,0.85); backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    nav .logo { font-weight: 800; font-size: 1.25rem; letter-spacing: -0.02em; }
+    nav .logo span { color: var(--accent); }
+    nav .links { display: flex; gap: 1.5rem; font-size: 0.9rem; }
+    nav .links a { color: var(--text-dim); transition: color 0.2s; }
+    nav .links a:hover { color: var(--text); text-decoration: none; }
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 8rem 2rem 4rem;
+      position: relative;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+      filter: blur(80px); pointer-events: none;
+    }
+    .hero h1 {
+      font-size: clamp(3rem, 7vw, 5.5rem); font-weight: 900;
+      letter-spacing: -0.03em; line-height: 1.05;
+      margin-bottom: 1.5rem; position: relative;
+    }
+    .hero h1 .strike {
+      color: var(--red); text-decoration: line-through;
+      text-decoration-thickness: 3px; opacity: 0.7;
+    }
+    .hero h1 .clean { color: var(--accent); }
+    .hero .tagline {
+      font-size: 1.25rem; color: var(--text-dim); max-width: 600px;
+      margin-bottom: 2.5rem; font-weight: 300; position: relative;
+    }
+    .hero .cta-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; position: relative; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      padding: 0.8rem 1.8rem; border-radius: 8px; font-size: 0.95rem;
+      font-weight: 600; font-family: var(--font-display); cursor: pointer;
+      border: none; transition: all 0.2s;
+    }
+    .btn-primary {
+      background: var(--accent); color: #070a08;
+    }
+    .btn-primary:hover { background: #2ae888; text-decoration: none; transform: translateY(-1px); }
+    .btn-secondary {
+      background: transparent; color: var(--text); border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+    /* ── Install block ── */
+    .install-block {
+      margin-top: 3rem; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1rem 1.5rem; font-family: var(--font-mono);
+      font-size: 0.9rem; color: var(--accent); position: relative;
+      max-width: 500px; text-align: left;
+    }
+    .install-block .prefix { color: var(--text-dim); user-select: none; }
+    .install-block .copy-btn {
+      position: absolute; top: 0.75rem; right: 0.75rem;
+      background: var(--surface-2); border: 1px solid var(--border);
+      color: var(--text-dim); padding: 0.3rem 0.6rem; border-radius: 4px;
+      font-size: 0.75rem; cursor: pointer; font-family: var(--font-mono);
+    }
+    .install-block .copy-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+    /* ── Section layout ── */
+    section { padding: 6rem 2rem; max-width: 1100px; margin: 0 auto; }
+    section h2 {
+      font-size: 2.2rem; font-weight: 800; letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+    }
+    section h2 span { color: var(--accent); }
+    section .subtitle { color: var(--text-dim); font-size: 1.1rem; margin-bottom: 3rem; max-width: 600px; }
+    /* ── Tool cards ── */
+    .tools-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+    }
+    .tool-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.5rem;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .tool-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+    .tool-card .tool-name {
+      font-family: var(--font-mono); font-size: 0.95rem; font-weight: 700;
+      color: var(--accent); margin-bottom: 0.5rem;
+    }
+    .tool-card .tool-when {
+      font-size: 0.8rem; color: var(--text-dim); margin-bottom: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600;
+    }
+    .tool-card p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.5; }
+    /* ── Languages ── */
+    .lang-row {
+      display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 3rem;
+    }
+    .lang-pill {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 0.6rem 1.2rem; border-radius: 8px;
+      font-family: var(--font-mono); font-size: 0.85rem;
+      color: var(--text-dim); transition: all 0.2s;
+    }
+    .lang-pill:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── Before/After ── */
+    .comparison {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    @media (max-width: 768px) { .comparison { grid-template-columns: 1fr; } }
+    .comparison pre {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 1.5rem; overflow-x: auto;
+      font-family: var(--font-mono); font-size: 0.8rem; line-height: 1.7;
+    }
+    .comparison .label {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.08em; margin-bottom: 0.5rem;
+    }
+    .comparison .bad .label { color: var(--red); }
+    .comparison .good .label { color: var(--accent); }
+    .comparison .bad pre { border-color: rgba(240,72,72,0.3); }
+    .comparison .good pre { border-color: rgba(34,214,122,0.3); }
+    /* ── Footer ── */
+    footer {
+      border-top: 1px solid var(--border); padding: 3rem 2rem;
+      text-align: center; color: var(--text-dim); font-size: 0.85rem;
+    }
+    footer a { color: var(--text-dim); }
+    footer a:hover { color: var(--accent); }
+    footer .footer-links { display: flex; gap: 2rem; justify-content: center; margin-bottom: 1rem; }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-up { animation: fadeUp 0.6s ease-out both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+  </style>
+</head>
+<body>
+<div class="grain"></div>
+
+<nav>
+  <div class="logo">de<span>slop</span>ify</div>
+  <div class="links">
+    <a href="#tools">Tools</a>
+    <a href="#languages">Languages</a>
+    <a href="#example">Example</a>
+    <a href="https://github.com/veroxsity/deslopify">GitHub</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1 class="fade-up">
+    Stop <span class="strike">AI slop</span><br>at the source.
+  </h1>
+  <p class="tagline fade-up delay-1">
+    A universal MCP server that acts as a code quality gate for AI assistants.
+    Pre-generation guidance. Post-generation review. Root cause analysis.
+  </p>
+  <div class="cta-row fade-up delay-2">
+    <a href="https://github.com/veroxsity/deslopify" class="btn btn-primary">View on GitHub</a>
+    <a href="#tools" class="btn btn-secondary">See what it catches</a>
+  </div>
+
+  <div class="install-block fade-up delay-3">
+    <button class="copy-btn" onclick="navigator.clipboard.writeText('npx deslopify');this.textContent='Copied!'">Copy</button>
+    <span class="prefix">$ </span>npx deslopify
+  </div>
+</div>
+<!-- Tools section -->
+<section id="tools">
+  <h2 class="fade-up"><span>6 tools</span> your AI should be calling.</h2>
+  <p class="subtitle fade-up delay-1">Every tool returns structured JSON the AI can act on. No prose, no guessing.</p>
+
+  <div class="tools-grid">
+    <div class="tool-card fade-up delay-1">
+      <div class="tool-when">Before writing code</div>
+      <div class="tool-name">get_guidance</div>
+      <p>Returns language-specific idioms, pitfalls, and architecture notes. The AI reads this before generating a single line.</p>
+    </div>
+    <div class="tool-card fade-up delay-2">
+      <div class="tool-when">After writing code</div>
+      <div class="tool-name">review_code</div>
+      <p>Scores code 0-100 across robustness, idiom, generality, architecture, testability, and performance. Lists every issue with fix suggestions.</p>
+    </div>
+    <div class="tool-card fade-up delay-2">
+      <div class="tool-when">Before fixing a bug</div>
+      <div class="tool-name">validate_approach</div>
+      <p>Detects symptom-only fixes. If the AI is patching a leaf when the root cause is in a caller, Deslopify blocks it.</p>
+    </div>
+    <div class="tool-card fade-up delay-3">
+      <div class="tool-when">After writing code</div>
+      <div class="tool-name">suggest_tests</div>
+      <p>Generates structured test cases with framework-specific skeletons. Covers edge cases, error paths, and concurrency.</p>
+    </div>
+    <div class="tool-card fade-up delay-3">
+      <div class="tool-when">When adding packages</div>
+      <div class="tool-name">check_dependencies</div>
+      <p>Flags abandoned, deprecated, and overkill packages. Suggests lighter alternatives when a 50MB library is imported for one function.</p>
+    </div>
+    <div class="tool-card fade-up delay-4">
+      <div class="tool-when">When using unfamiliar APIs</div>
+      <div class="tool-name">check_api_exists</div>
+      <p>The anti-hallucination tool. Verifies whether an API actually exists in the target language and version before the AI uses it.</p>
+    </div>
+  </div>
+</section>
+<!-- Languages section -->
+<section id="languages">
+  <h2 class="fade-up"><span>5 languages.</span> One quality standard.</h2>
+  <p class="subtitle fade-up delay-1">Language-specific idiom rules, anti-patterns, and best practices. Not generic advice — real patterns for each ecosystem.</p>
+
+  <div class="lang-row fade-up delay-2">
+    <div class="lang-pill">C++ 17/20/23</div>
+    <div class="lang-pill">C# .NET 6/7/8+</div>
+    <div class="lang-pill">Python 3.10+</div>
+    <div class="lang-pill">Java 17/21+</div>
+    <div class="lang-pill">TypeScript 5.x+</div>
+  </div>
+</section>
+<!-- Example section -->
+<section id="example">
+  <h2 class="fade-up">Before & after <span>Deslopify</span>.</h2>
+  <p class="subtitle fade-up delay-1">Real output from an AI fixing sloppy C++ code with Deslopify active.</p>
+
+  <div class="comparison fade-up delay-2">
+    <div class="bad">
+      <div class="label">Before — Score: 9/100</div>
+      <pre><code>class ResourceManager {
+    Widget* widget;
+    Connection* conn;
+public:
+    ResourceManager() {
+        widget = new Widget();
+        conn = new Connection("localhost", 5432);
+    }
+    ~ResourceManager() {
+        delete widget;
+        delete conn;
+    }
+};
+
+void incrementCounter() {
+    mtx.lock();
+    sharedCounter++;
+    doSomethingRisky();
+    mtx.unlock();
+}
+
+void processFile(const std::string&amp; path) {
+    try {
+        auto data = readFile(path);
+        parse(data);
+    } catch (...) {
+        // silently ignore all errors
+    }
+}</code></pre>
+    </div>
+    <div class="good">
+      <div class="label">After — Score: 92/100</div>
+      <pre><code>class ResourceManager {
+    std::unique_ptr&lt;Widget&gt; widget;
+    std::unique_ptr&lt;Connection&gt; conn;
+public:
+    ResourceManager()
+        : widget{std::make_unique&lt;Widget&gt;()}
+        , conn{std::make_unique&lt;Connection&gt;(...)}
+    {}
+    ResourceManager(const ResourceManager&amp;) = delete;
+    ResourceManager(ResourceManager&amp;&amp;) = default;
+};
+
+void incrementCounter() {
+    const std::scoped_lock lock{mtx};
+    sharedCounter++;
+    doSomethingRisky();
+}
+
+void processFile(std::string_view path) {
+    try {
+        auto data = readFile(path);
+        parse(data);
+    } catch (const std::exception&amp; e) {
+        std::cerr &lt;&lt; "Failed: " &lt;&lt; e.what();
+        throw;
+    }
+}</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- Connect section -->
+<section id="connect">
+  <h2 class="fade-up">Get <span>connected</span> in 30 seconds.</h2>
+  <p class="subtitle fade-up delay-1">Works with any MCP-compatible client. Claude Desktop, Claude Code, Cursor, Windsurf, Codex CLI.</p>
+
+  <div class="tools-grid fade-up delay-2">
+    <div class="tool-card">
+      <div class="tool-when">Claude Code / Codex CLI</div>
+      <div class="tool-name" style="color: var(--text);">Streamable HTTP</div>
+      <pre style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;margin-top:0.75rem;font-size:0.8rem;"><code>claude mcp add deslopify \
+  --url https://deslopify.banditvault.co.uk/mcp</code></pre>
+    </div>
+    <div class="tool-card">
+      <div class="tool-when">Claude Desktop</div>
+      <div class="tool-name" style="color: var(--text);">Desktop Extension</div>
+      <p>Install the <code>.mcpb</code> extension from the GitHub releases page. One-click install via Settings → Extensions.</p>
+    </div>
+    <div class="tool-card">
+      <div class="tool-when">Local / stdio</div>
+      <div class="tool-name" style="color: var(--text);">npx</div>
+      <pre style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:0.75rem;margin-top:0.75rem;font-size:0.8rem;"><code>npx deslopify</code></pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-links">
+    <a href="https://github.com/veroxsity/deslopify">GitHub</a>
+    <a href="https://github.com/veroxsity/deslopify/blob/main/README.md">Docs</a>
+    <a href="/api/health">API Status</a>
+    <a href="https://github.com/veroxsity/deslopify/issues">Issues</a>
+  </div>
+  <p>Built by <a href="https://github.com/veroxsity">veroxsity</a>. MIT License. Stop AI slop at the source.</p>
+</footer>
+
+<script>
+  // Intersection observer for scroll-triggered fade-ups
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animationPlayState = 'running';
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('section .fade-up').forEach(el => {
+    el.style.animationPlayState = 'paused';
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>

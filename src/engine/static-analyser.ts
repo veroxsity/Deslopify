@@ -200,11 +200,55 @@ export class StaticAnalyser {
         { regex: /["'](?:sk_live|pk_live|sk_test|pk_test|sk-proj|ghp_|gho_|AKIA)[A-Za-z0-9_-]+["']/g },
       ],
 
-      copy_paste_duplication: [],
+      copy_paste_duplication: [
+        // Two functions with near-identical structure (same method calls in same order)
+        // Heuristic: detect two function bodies that both call the same 3+ methods
+        { regex: /function\s+\w+\s*\([^)]*\)\s*\{[^}]*?(\w+\([^)]*\))[^}]*?(\w+\([^)]*\))[^}]*?(\w+\([^)]*\))[^}]*\}[\s\S]{0,200}function\s+\w+\s*\([^)]*\)\s*\{[^}]*?\1[^}]*?\2[^}]*?\3[^}]*\}/gm },
+      ],
 
-      narrow_solution: [],
+      narrow_solution: [
+        // Function parameter typed to a specific concrete class where an interface/generic would work
+        // Heuristic: function that takes string[] when T[] would generalize
+        { regex: /function\s+\w+\s*\(\s*\w+\s*:\s*string\s*\[\s*\]\s*\)/g },
+        // Hardcoded type in generic-capable position
+        { regex: /function\s+\w+\s*\(\s*\w+\s*:\s*(?:number|string|boolean)\s*\[\s*\]\s*\)\s*:\s*(?:number|string|boolean)\s*\[\s*\]/g },
+        // Python: function that operates on list but specifies type in name
+        { regex: /def\s+\w+(?:_str|_int|_string|_number)\s*\(/g },
+      ],
 
-      dependency_bloat: [],
+      dependency_bloat: [
+        // Importing lodash
+        { regex: /import\s+(?:_|\w+)\s+from\s+['"]lodash['"]/g },
+        { regex: /require\s*\(\s*['"]lodash['"]\s*\)/g },
+        // Importing moment (deprecated)
+        { regex: /import\s+\w+\s+from\s+['"]moment['"]/g },
+        { regex: /require\s*\(\s*['"]moment['"]\s*\)/g },
+        // Importing jquery
+        { regex: /import\s+(?:\$|\w+)\s+from\s+['"]jquery['"]/g },
+        // Importing left-pad, is-odd, is-even, is-number type micro-packages
+        { regex: /import\s+\w+\s+from\s+['"](?:left-pad|is-odd|is-even|is-number|is-string|is-boolean|is-array)['"]/g },
+        // Python: importing deprecated/heavy packages
+        { regex: /import\s+(?:urllib2|optparse)\b/g },
+      ],
+
+      over_engineering: [
+        // Abstract factory pattern for simple cases (AbstractFactory in class name)
+        { regex: /class\s+\w*(?:Abstract|Base)\w*Factory\w*/g },
+        // Strategy pattern with only one implementation
+        { regex: /interface\s+\w+Strategy\b/g },
+      ],
+
+      repetitive_boilerplate: [
+        // 3+ consecutive similar function signatures
+        { regex: /(?:function\s+\w+\s*\([^)]*\)\s*\{[^}]{0,100}\}\s*\n?\s*){3,}/gm },
+      ],
+
+      ignoring_language_conventions: [
+        // Java-style getters in Python
+        { regex: /def\s+get[A-Z]\w+\s*\(\s*self\s*\)/g },
+        // Semicolons at end of lines in Python
+        { regex: /^\s*\w[^#\n]*;\s*$/gm },
+      ],
 
       // ── C++ patterns ──
 
@@ -376,6 +420,20 @@ export class StaticAnalyser {
         // '%s' % or '%d' % formatting
         { regex: /['"][^'"]*%[sdfrx][^'"]*['"]\s*%\s*/g },
       ],
+
+      // Python AI mistakes
+      unnecessary_list_comprehension: [
+        { regex: /\[\s*\w+\s+for\s+\w+\s+in\s+\w+\s*\]/g },
+      ],
+
+      manual_string_building: [
+        { regex: /(?:for|while)\s.*:\s*\n(?:\s+.*\n)*?\s+\w+\s*\+=\s*(?:"|'|f")/gm },
+      ],
+
+      dict_get_with_none_default: [
+        { regex: /\.get\s*\(\s*\w+\s*,\s*None\s*\)/g },
+      ],
+
       // ── TypeScript patterns ──
 
       no_any_leakage: [
@@ -498,6 +556,76 @@ export class StaticAnalyser {
 
       system_exit_in_library: [
         { regex: /System\.exit\s*\(/g },
+      ],
+
+      // ── C++ AI mistakes ──
+
+      unnecessary_this: [
+        { regex: /this\s*->\s*\w+/g },
+      ],
+
+      iostream_for_logging: [
+        // std::cout for what looks like logging
+        { regex: /std::cout\s*<<\s*["'](?:Error|Warning|Info|Debug|Log)/g },
+      ],
+
+      // ── C# AI mistakes ──
+
+      string_interpolation_over_format: [
+        { regex: /String\.Format\s*\(/g },
+        { regex: /string\.Format\s*\(/g },
+      ],
+
+      task_run_for_async: [
+        { regex: /Task\.Run\s*\(\s*(?:async\s*)?\(\s*\)\s*=>/g },
+      ],
+
+      // ── Python AI mistakes ──
+
+      unnecessary_else_after_return: [
+        { regex: /return\s+\w[^;\n]*\n\s*else\s*:/gm },
+      ],
+
+      // ── TypeScript AI mistakes ──
+
+      unnecessary_type_assertion: [
+        // as Type on JSON.parse result
+        { regex: /JSON\.parse\s*\([^)]*\)\s*as\s+\w+/g },
+        // as Type on fetch response
+        { regex: /\.json\s*\(\s*\)\s*(?:as\s+\w+|then)/g },
+      ],
+
+      empty_interface: [
+        { regex: /interface\s+\w+\s*(?:extends\s+\w+\s*)?\{\s*\}/g },
+      ],
+
+      unnecessary_async: [
+        // async function with no await inside (heuristic: small function body)
+        { regex: /async\s+(?:function\s+\w+|(?:\w+\s*=\s*async))\s*\([^)]*\)\s*(?::\s*\w+[^{]*)?\{[^}]{0,200}\}(?![\s\S]{0,5}await)/gm },
+      ],
+
+      relative_import_hell: [
+        // 3+ levels of ../
+        { regex: /from\s+['"](?:\.\.\/){3,}/g },
+        { regex: /import\s+.*['"](?:\.\.\/){3,}/g },
+        { regex: /require\s*\(\s*['"](?:\.\.\/){3,}/g },
+      ],
+
+      // ── Java AI mistakes ──
+
+      unnecessary_boxing: [
+        // Integer x = instead of int x =
+        { regex: /\b(?:Integer|Long|Double|Float|Boolean|Character)\s+\w+\s*=\s*(?!\s*null)/g },
+      ],
+
+      verbose_null_checks: [
+        // Nested null checks
+        { regex: /if\s*\(\s*\w+\s*!=\s*null\s*\)\s*\{[\s\n]*if\s*\(\s*\w+\.\w+\s*!=\s*null\s*\)/gm },
+      ],
+
+      mutable_collections_exposed: [
+        // return this.list or return list (field)
+        { regex: /return\s+(?:this\.)?\w+(?:List|Set|Map|Items|Collection|Elements)\s*;/g },
       ],
     };
 

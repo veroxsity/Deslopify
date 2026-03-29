@@ -14,6 +14,7 @@ WORKDIR /app
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/rules ./rules
 COPY --from=builder /app/node_modules ./node_modules
+COPY src/public/ ./public/
 COPY package.json ./
 
 ENV DESLOPIFY_TRANSPORT=sse

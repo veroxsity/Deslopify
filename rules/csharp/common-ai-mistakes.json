@@ -1,0 +1,31 @@
+{
+  "common_ai_mistakes": [
+    {
+      "id": "CS_AI001",
+      "name": "new_list_from_linq",
+      "severity": "info",
+      "category": "performance",
+      "description": "AI creates a new List<T> then immediately fills it with AddRange or a loop. Use LINQ's ToList() or collection expressions directly.",
+      "detection": "Detect var list = new List<T>(); followed by AddRange or loop.",
+      "fix": "Use var list = source.Where(...).ToList(); or collection expressions [..items]."
+    },
+    {
+      "id": "CS_AI002",
+      "name": "string_interpolation_over_format",
+      "severity": "info",
+      "category": "idiom",
+      "description": "AI uses String.Format() when string interpolation ($\"\") is cleaner and less error-prone.",
+      "detection": "Detect String.Format calls.",
+      "fix": "Replace String.Format(\"{0} {1}\", a, b) with $\"{a} {b}\"."
+    },
+    {
+      "id": "CS_AI003",
+      "name": "task_run_for_async",
+      "severity": "warning",
+      "category": "performance",
+      "description": "AI wraps synchronous code in Task.Run to make it 'async'. This wastes a thread pool thread. Only use Task.Run for CPU-bound work off the UI thread.",
+      "detection": "Detect Task.Run wrapping non-CPU-bound operations.",
+      "fix": "Use proper async APIs (e.g., ReadAsync, SendAsync). Don't fake async with Task.Run."
+    }
+  ]
+}
