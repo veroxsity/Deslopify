@@ -75,7 +75,7 @@ claude mcp add deslopify --url http://optiplex:7381/mcp
 ### Remote (once DNS propagates)
 
 ```bash
-claude mcp add deslopify --url https://mcp.deslopify.co.uk/mcp
+claude mcp add deslopify --url https://deslopify.co.uk/mcp
 ```
 
 ## Tools
