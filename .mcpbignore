@@ -21,8 +21,14 @@ node_modules/@esbuild/
 node_modules/rollup/
 node_modules/postcss/
 
-# Source (build output is sufficient)
-src/
+# Source TypeScript (build output is sufficient)
+src/engine/
+src/tools/
+src/prompts/
+src/resources/
+src/types/
+src/server.ts
+src/index.ts
 
 # Tests
 tests/
