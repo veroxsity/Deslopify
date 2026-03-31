@@ -35,6 +35,33 @@
       "description": "String literals used for comparison, dictionary keys, or routing are fragile. Use constants, enums, or nameof().",
       "detection": "Detect string literals in if comparisons or dictionary access.",
       "fix": "Extract to const fields, use nameof() for property/method names, or use enums."
+    },
+    {
+      "id": "CS_AP005",
+      "name": "linq_misuse",
+      "severity": "info",
+      "category": "performance",
+      "description": "Inefficient LINQ patterns: chained .Where(), .Count() > 0 instead of .Any(), .ToList() mid-chain.",
+      "detection": "Detect .Where().Where(), .Count() > 0, .ToList() followed by further LINQ.",
+      "fix": "Combine Where predicates, use .Any() instead of .Count() > 0, defer .ToList() to the end."
+    },
+    {
+      "id": "CS_AP006",
+      "name": "new_list_add_range",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Creating a new List then immediately AddRange. Use collection initializer or LINQ ToList().",
+      "detection": "Detect new List<T>() followed by AddRange.",
+      "fix": "Use source.Where(...).ToList() or collection expressions [..items]."
+    },
+    {
+      "id": "CS_AP007",
+      "name": "god_class_csharp",
+      "severity": "warning",
+      "category": "architecture",
+      "description": "Class with too many responsibilities. Hard to test, maintain, and reason about.",
+      "detection": "Detect classes with 10+ public methods.",
+      "fix": "Split into smaller focused classes. Apply single responsibility principle."
     }
   ]
 }

@@ -44,6 +44,33 @@
       "description": "Index signatures ([key: string]: any) lose type safety. Use Map<K,V>, Record<K,V>, or explicit interfaces.",
       "detection": "Detect [key: string]: any index signatures.",
       "fix": "Use Record<string, SpecificType>, Map<string, SpecificType>, or define proper interface properties."
+    },
+    {
+      "id": "TS_AP006",
+      "name": "promise_constructor_antipattern",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "Wrapping an already-async operation in new Promise() is redundant and error-prone. The inner async function already returns a Promise.",
+      "detection": "Detect new Promise() wrapping await or .then() chains.",
+      "fix": "Return the async result directly. async functions already return Promises."
+    },
+    {
+      "id": "TS_AP007",
+      "name": "typeof_guard_misuse",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "typeof x === 'object' returns true for null. Always pair with a null check.",
+      "detection": "Detect typeof x === 'object' without accompanying null check.",
+      "fix": "Use typeof x === 'object' && x !== null, or use a proper type guard function."
+    },
+    {
+      "id": "TS_AP008",
+      "name": "non_null_assertion",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "The ! non-null assertion operator tells TypeScript to trust you, bypassing type safety. If you're wrong, you get a runtime error.",
+      "detection": "Detect x!. and x![ non-null assertion usage.",
+      "fix": "Use proper null checks: if (x) { x.prop } or optional chaining: x?.prop."
     }
   ]
 }

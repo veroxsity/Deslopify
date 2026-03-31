@@ -44,6 +44,51 @@
       "description": "% string formatting is outdated. Use f-strings (3.6+) or str.format() for clarity and safety.",
       "detection": "Detect '%s' % or '%d' % formatting patterns.",
       "fix": "Replace 'Hello %s' % name with f'Hello {name}'"
+    },
+    {
+      "id": "PY_AP006",
+      "name": "assert_in_production",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "assert statements are stripped when Python runs with -O flag. Never use assert for input validation or security checks.",
+      "detection": "Detect assert used for input validation in non-test code.",
+      "fix": "Use if/raise ValueError for input validation. Keep assert for internal invariants only."
+    },
+    {
+      "id": "PY_AP007",
+      "name": "mutable_class_variable",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Mutable class-level variables (list, dict, set) are shared across all instances. A mutation on one instance affects all others.",
+      "detection": "Detect class-level assignments to [], {}, or set().",
+      "fix": "Move mutable defaults into __init__: self.items = [] instead of items = [] at class level."
+    },
+    {
+      "id": "PY_AP008",
+      "name": "len_comparison",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Comparing len(x) to 0 is non-Pythonic. Empty containers are falsy, non-empty are truthy.",
+      "detection": "Detect if len(x) == 0, if len(x) > 0, if len(x) != 0.",
+      "fix": "Use 'if not x:' instead of 'if len(x) == 0:' and 'if x:' instead of 'if len(x) > 0:'."
+    },
+    {
+      "id": "PY_AP009",
+      "name": "type_comparison",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "Using type(x) == or type(x) is for type checks ignores inheritance. Use isinstance() instead.",
+      "detection": "Detect type(x) == Type or type(x) is Type patterns.",
+      "fix": "Replace type(x) == int with isinstance(x, int). Supports tuples: isinstance(x, (int, float))."
+    },
+    {
+      "id": "PY_AP010",
+      "name": "manual_dict_check",
+      "severity": "info",
+      "category": "idiom",
+      "description": "Checking if key exists then accessing dict[key] is redundant. Use dict.get() or try/except KeyError.",
+      "detection": "Detect if key in dict: value = dict[key] patterns.",
+      "fix": "Use value = d.get(key, default) or try: value = d[key] except KeyError: ..."
     }
   ]
 }

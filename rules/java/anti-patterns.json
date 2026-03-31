@@ -35,6 +35,42 @@
       "description": "System.exit() should never be called in library code. It kills the entire JVM. Throw an exception instead.",
       "detection": "Detect System.exit() calls.",
       "fix": "Throw an appropriate exception. Let the top-level caller decide whether to exit."
+    },
+    {
+      "id": "JV_AP005",
+      "name": "synchronized_method",
+      "severity": "warning",
+      "category": "performance",
+      "description": "Synchronizing an entire method is usually too coarse-grained. Only the critical section needs protection.",
+      "detection": "Detect public synchronized methods.",
+      "fix": "Use synchronized blocks on specific objects. Consider java.util.concurrent locks for finer control."
+    },
+    {
+      "id": "JV_AP006",
+      "name": "string_equals_order",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "variable.equals(\"literal\") throws NullPointerException if variable is null. Reverse the order.",
+      "detection": "Detect variable.equals(\"string literal\") patterns.",
+      "fix": "Use \"literal\".equals(variable) or Objects.equals(variable, \"literal\")."
+    },
+    {
+      "id": "JV_AP007",
+      "name": "concatenation_in_logger",
+      "severity": "info",
+      "category": "performance",
+      "description": "String concatenation in logger calls evaluates even when the log level is disabled. Use parameterized messages.",
+      "detection": "Detect logger.info(\"msg\" + var) or log.debug(\"msg\" + var) patterns.",
+      "fix": "Use logger.info(\"Message: {}\", var) with SLF4J parameterized logging."
+    },
+    {
+      "id": "JV_AP008",
+      "name": "field_injection",
+      "severity": "warning",
+      "category": "testability",
+      "description": "@Autowired/@Inject on fields makes classes hard to test and hides dependencies. Use constructor injection.",
+      "detection": "Detect @Autowired or @Inject on private/protected fields.",
+      "fix": "Use constructor injection: private final Service service; public MyClass(Service service) { this.service = service; }"
     }
   ]
 }

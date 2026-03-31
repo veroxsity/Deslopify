@@ -67,6 +67,33 @@
       "fix": "Add readonly modifier. Use Readonly<T> and ReadonlyArray<T> for immutable structures.",
       "bad_example": "class Config { host: string; port: number; constructor(h: string, p: number) { this.host = h; this.port = p; } }",
       "good_example": "class Config { constructor(readonly host: string, readonly port: number) {} }"
+    },
+    {
+      "id": "TS007",
+      "name": "non_null_assertion",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "The ! operator bypasses TypeScript's null safety. Use optional chaining (?.) or proper null checks instead.",
+      "bad_example": "const name = user!.profile!.name;",
+      "good_example": "const name = user?.profile?.name ?? 'Unknown';"
+    },
+    {
+      "id": "TS008",
+      "name": "console_log_in_production",
+      "severity": "info",
+      "category": "architecture",
+      "description": "console.log in production code clutters output and can leak sensitive data. Use a proper logger.",
+      "bad_example": "console.log('User logged in:', userId);",
+      "good_example": "logger.info('User logged in', { userId });"
+    },
+    {
+      "id": "TS009",
+      "name": "enum_antipattern",
+      "severity": "info",
+      "category": "idiom",
+      "description": "TypeScript enums have surprising runtime behaviour. Prefer union types or const objects for type safety.",
+      "bad_example": "enum Status { Active, Inactive }",
+      "good_example": "type Status = 'active' | 'inactive'; // or: const Status = { Active: 'active', Inactive: 'inactive' } as const;"
     }
   ]
 }

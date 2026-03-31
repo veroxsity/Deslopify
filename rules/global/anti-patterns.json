@@ -131,6 +131,33 @@
       "fix": "Use the language's abstraction mechanisms (generics, macros, decorators, metaprogramming).",
       "bad_example": "function parseString(v) { ... }\nfunction parseInt(v) { ... }\nfunction parseFloat(v) { ... }",
       "good_example": "function parse<T>(v: unknown, parser: Parser<T>): T { ... }"
+    },
+    {
+      "id": "G013",
+      "name": "untestable_structure",
+      "severity": "warning",
+      "category": "testability",
+      "description": "Code cannot be unit tested without modification due to hidden deps, static calls, or constructor side effects.",
+      "detection": "Identify deeply chained static calls, new in business logic, or hardcoded file paths.",
+      "fix": "Inject dependencies via constructor or method parameters. Wrap static calls behind interfaces."
+    },
+    {
+      "id": "G014",
+      "name": "magic_numbers",
+      "severity": "info",
+      "category": "architecture",
+      "description": "Raw numeric literals used in logic without explanation. Makes code harder to understand and maintain.",
+      "detection": "Detect numeric literals > 1 used in conditionals, timeouts, array indices, or return values.",
+      "fix": "Extract to named constants: const MAX_RETRIES = 3; const TIMEOUT_MS = 5000;"
+    },
+    {
+      "id": "G015",
+      "name": "missing_return_type",
+      "severity": "info",
+      "category": "robustness",
+      "description": "Functions without explicit return types rely on type inference, which can silently change when the implementation changes.",
+      "detection": "Detect exported or public functions without return type annotations.",
+      "fix": "Add explicit return types to all exported/public functions."
     }
   ]
 }

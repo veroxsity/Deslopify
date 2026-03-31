@@ -180,13 +180,19 @@ export class StaticAnalyser {
 
       missing_error_paths: [
         // JSON.parse without surrounding try/catch
-        { regex: /JSON\.parse\s*\([^)]*\)(?!\s*(?:catch|\.catch))/g },
-        // parseInt/parseFloat without NaN check
-        { regex: /(?:parseInt|parseFloat)\s*\([^)]*\)(?!\s*(?:if|&&|\|\||isNaN|Number\.isNaN))/g },
-        // Division without zero check (basic)
-        { regex: /\w+\s*\/\s*\w+(?!\s*(?:if|&&|\?|:|\|\|))/g },
-        // Array index access without bounds check
-        { regex: /\w+\[\s*\w+\s*\](?!\s*(?:\?\.|if|&&|\|\|))/g },
+        { regex: /JSON\.parse\s*\([^)]*\)(?![\s\S]{0,50}catch)/g },
+        // parseInt/parseFloat without NaN check nearby
+        { regex: /(?:const|let|var)\s+\w+\s*=\s*(?:parseInt|parseFloat)\s*\([^)]*\)\s*;(?![\s\S]{0,80}(?:isNaN|Number\.isNaN))/g },
+        // fetch/axios without try/catch or .catch
+        { regex: /(?:fetch|axios\.\w+)\s*\([^)]*\)(?![\s\S]{0,60}(?:\.catch|catch\s*\())/g },
+        // File read/write without error handling
+        { regex: /(?:readFileSync|writeFileSync)\s*\([^)]*\)(?![\s\S]{0,60}catch)/g },
+        // Python: open() without with or try
+        { regex: /^\s*\w+\s*=\s*open\s*\([^)]*\)$/gm },
+        // C++: std::stoi/stof/stod without try/catch
+        { regex: /std::(?:stoi|stof|stod|stol|stoul)\s*\(/g },
+        // Unchecked .get() on map/dict that could throw or return undefined
+        { regex: /\.get\s*\(\s*\w+\s*\)\s*\.\w+/g },
       ],
 
       hardcoded_configuration: [
@@ -198,6 +204,14 @@ export class StaticAnalyser {
         { regex: /["']https?:\/\/(?!(?:example\.com|localhost))[a-zA-Z0-9.-]+\.[a-z]{2,}\/[^"']*["']/g },
         // Common secret patterns (sk_live, pk_test, etc.)
         { regex: /["'](?:sk_live|pk_live|sk_test|pk_test|sk-proj|ghp_|gho_|AKIA)[A-Za-z0-9_-]+["']/g },
+        // Hardcoded port numbers in code
+        { regex: /(?:port|PORT)\s*[:=]\s*\d{4,5}\b/g },
+        // Database connection strings
+        { regex: /["'](?:mongodb|postgresql|mysql|redis|amqp):\/\/[^"']+["']/g },
+        // Email addresses hardcoded
+        { regex: /["'][a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}["']/g },
+        // Hardcoded file paths (Windows or Unix absolute paths)
+        { regex: /["'](?:\/(?:usr|etc|var|home|opt)\/|[A-Z]:\\)[^"']+["']/g },
       ],
 
       copy_paste_duplication: [
@@ -236,18 +250,79 @@ export class StaticAnalyser {
         { regex: /class\s+\w*(?:Abstract|Base)\w*Factory\w*/g },
         // Strategy pattern with only one implementation
         { regex: /interface\s+\w+Strategy\b/g },
+        // Singleton pattern
+        { regex: /(?:getInstance|get_instance|INSTANCE)\s*\(\s*\)/g },
+        // Visitor pattern (usually overkill)
+        { regex: /interface\s+\w+Visitor\b/g },
+        // Builder for classes with < 4 fields
+        { regex: /class\s+\w+Builder\b/g },
+        // Multiple layers of abstraction (Manager of a Manager)
+        { regex: /class\s+\w+(?:Manager|Service|Handler|Controller)(?:Manager|Service|Handler|Controller)\b/g },
       ],
 
       repetitive_boilerplate: [
         // 3+ consecutive similar function signatures
         { regex: /(?:function\s+\w+\s*\([^)]*\)\s*\{[^}]{0,100}\}\s*\n?\s*){3,}/gm },
+        // 3+ consecutive similar method signatures in a class
+        { regex: /(?:(?:public|private|protected)\s+\w+\s+\w+\s*\([^)]*\)\s*\{[^}]{0,100}\}\s*\n?\s*){3,}/gm },
+        // Python: 3+ consecutive similar def statements
+        { regex: /(?:def\s+\w+\s*\([^)]*\)\s*:.*\n(?:\s+.*\n){0,3}){3,}/gm },
       ],
 
       ignoring_language_conventions: [
-        // Java-style getters in Python
-        { regex: /def\s+get[A-Z]\w+\s*\(\s*self\s*\)/g },
-        // Semicolons at end of lines in Python
-        { regex: /^\s*\w[^#\n]*;\s*$/gm },
+        // camelCase in Python (should be snake_case)
+        ...(language === "python" ? [
+          { regex: /def\s+[a-z]+[A-Z]\w+\s*\(/g },
+          // Java-style getters in Python
+          { regex: /def\s+get[A-Z]\w+\s*\(\s*self\s*\)/g },
+          // Semicolons at end of lines in Python
+          { regex: /^\s*[a-zA-Z]\w*[^#\n]*;\s*$/gm },
+        ] : []),
+        // snake_case in Java/C#/TypeScript (should be camelCase for methods)
+        ...(language === "java" || language === "csharp" || language === "typescript" ? [
+          { regex: /(?:public|private|protected)\s+\w+\s+[a-z]+_[a-z]+\w*\s*\(/g },
+        ] : []),
+        // ALL_CAPS for non-constants (let/var but not const)
+        ...(language === "typescript" || language === "csharp" || language === "java" ? [
+          { regex: /(?:let|var)\s+[A-Z][A-Z_]{2,}\s*=/g },
+        ] : []),
+      ],
+
+      untestable_structure: [
+        // new in the middle of business logic (should be injected)
+        { regex: /(?:if|else|for|while|switch)\s*[({][\s\S]{0,200}new\s+\w+\s*\(/gm },
+        // Hard-coded file paths in logic
+        { regex: /(?:readFile|writeFile|open|fopen)\s*\(\s*["'][^"']+["']\s*\)/g },
+        // Direct static class method calls on concrete dependencies
+        { regex: /(?:Database|HttpClient|FileSystem|Cache|Redis|Mongo)\.\w+\s*\(/g },
+        // Global/singleton access patterns
+        { regex: /(?:getInstance|getDefault|shared|current)\s*\(\s*\)\.\w+/g },
+      ],
+
+      magic_numbers: [
+        // Timeout/delay with hardcoded ms values
+        { regex: /(?:setTimeout|setInterval|delay|sleep|wait)\s*\([^,]*,\s*\d{3,}\s*\)/g },
+        // Hardcoded retry counts / limits in conditions
+        { regex: /(?:retries?|attempts?|maxRetries|max_retries)\s*[<>=!]+\s*\d+/gi },
+        // Hardcoded port numbers in assignments
+        { regex: /(?:port|PORT)\s*[:=]\s*\d{4,5}\b/g },
+        // Hardcoded HTTP status codes in comparisons
+        { regex: /===?\s*(?:200|201|301|302|400|401|403|404|500|503)\b/g },
+        // Numeric literal in multiplication/division (likely a conversion factor)
+        { regex: /\*\s*(?:60|24|1000|1024|3600|86400)\b/g },
+      ],
+
+      missing_return_type: [
+        // TypeScript function without return type
+        ...(language === "typescript" ? [
+          { regex: /(?:export\s+)?(?:async\s+)?function\s+\w+\s*\([^)]*\)\s*\{/g },
+          // Arrow function without return type
+          { regex: /const\s+\w+\s*=\s*(?:async\s+)?\([^)]*\)\s*=>/g },
+        ] : []),
+        // Python function without type hints on return
+        ...(language === "python" ? [
+          { regex: /def\s+\w+\s*\([^)]*\)\s*:/g },
+        ] : []),
       ],
 
       // ── C++ patterns ──
@@ -316,6 +391,22 @@ export class StaticAnalyser {
         { regex: /<<\s*std::endl/g },
         { regex: /<<\s*endl/g },
       ],
+
+      macro_overuse: [
+        // #define for constants (should use constexpr)
+        { regex: /#define\s+[A-Z_]+\s+\d+/g },
+        // #define for simple functions (should use inline/constexpr)
+        { regex: /#define\s+\w+\s*\([^)]*\)\s+/g },
+      ],
+
+      goto_usage: [
+        { regex: /\bgoto\s+\w+/g },
+      ],
+
+      printf_usage: [
+        // printf/sprintf/fprintf in C++ (use std::format or streams)
+        { regex: /\b(?:printf|sprintf|fprintf|snprintf)\s*\(/g },
+      ],
       // ── C# patterns ──
 
       use_using_disposable: [
@@ -357,6 +448,25 @@ export class StaticAnalyser {
       empty_catch_rethrow: [
         // catch (Exception ex) { throw ex; } — loses stack trace
         { regex: /catch\s*\(\s*\w+\s+(\w+)\s*\)\s*\{[\s\n]*throw\s+\1\s*;[\s\n]*\}/gm },
+      ],
+
+      god_class_csharp: [
+        // Class with too many methods (heuristic: 10+ public methods)
+        { regex: /class\s+\w+[\s\S]*?(?:public\s+\w+\s+\w+\s*\([\s\S]*?\{[\s\S]*?\}[\s\S]*?){10,}/gm },
+      ],
+
+      linq_misuse: [
+        // Multiple .Where().Where() chains (should combine predicates)
+        { regex: /\.Where\s*\([^)]*\)\s*\.Where\s*\(/g },
+        // .Count() > 0 instead of .Any()
+        { regex: /\.Count\s*\(\s*\)\s*>\s*0/g },
+        // .ToList() in the middle of a chain
+        { regex: /\.ToList\s*\(\s*\)\s*\.\w+\s*\(/g },
+      ],
+
+      new_list_add_range: [
+        // new List<T>() followed by AddRange or loop
+        { regex: /new\s+List\s*<[^>]+>\s*\(\s*\)[\s\S]{0,50}\.AddRange\s*\(/gm },
       ],
       // ── Python patterns ──
 
@@ -434,6 +544,37 @@ export class StaticAnalyser {
         { regex: /\.get\s*\(\s*\w+\s*,\s*None\s*\)/g },
       ],
 
+      assert_in_production: [
+        // assert used for input validation (not testing)
+        { regex: /^\s*assert\s+\w+/gm },
+      ],
+
+      mutable_class_variable: [
+        // Class-level list/dict/set (shared across instances)
+        { regex: /class\s+\w+[^:]*:\s*\n(?:\s+(?:"""[\s\S]*?"""|#[^\n]*)?\n)*\s+\w+\s*(?::\s*(?:list|dict|List|Dict))?\s*=\s*(?:\[\s*\]|\{\s*\}|set\s*\(\s*\))/gm },
+      ],
+
+      len_comparison: [
+        // if len(x) == 0 instead of if not x
+        { regex: /if\s+len\s*\(\s*\w+\s*\)\s*==\s*0/g },
+        // if len(x) > 0 instead of if x
+        { regex: /if\s+len\s*\(\s*\w+\s*\)\s*>\s*0/g },
+        // if len(x) != 0 instead of if x
+        { regex: /if\s+len\s*\(\s*\w+\s*\)\s*!=\s*0/g },
+      ],
+
+      manual_dict_check: [
+        // if key in dict: value = dict[key] instead of dict.get(key)
+        { regex: /if\s+\w+\s+in\s+\w+\s*:[\s\n]+\w+\s*=\s*\w+\[\w+\]/gm },
+      ],
+
+      type_comparison: [
+        // type(x) == instead of isinstance
+        { regex: /type\s*\(\s*\w+\s*\)\s*==\s*/g },
+        // type(x) is instead of isinstance
+        { regex: /type\s*\(\s*\w+\s*\)\s+is\s+/g },
+      ],
+
       // ── TypeScript patterns ──
 
       no_any_leakage: [
@@ -503,6 +644,30 @@ export class StaticAnalyser {
       index_signature_overuse: [
         // [key: string]: any
         { regex: /\[\s*\w+\s*:\s*string\s*\]\s*:\s*any/g },
+        // [key: string]: unknown (still suspect)
+        { regex: /\[\s*\w+\s*:\s*string\s*\]\s*:\s*unknown/g },
+      ],
+
+      promise_constructor_antipattern: [
+        // new Promise wrapping an already-async operation
+        { regex: /new\s+Promise\s*\(\s*(?:async\s+)?\(\s*resolve\s*,?\s*reject?\s*\)\s*=>\s*\{[\s\S]{0,200}await\s+/gm },
+        // new Promise wrapping a .then chain
+        { regex: /new\s+Promise\s*\(\s*\(\s*resolve[\s\S]{0,200}\.then\s*\(/gm },
+      ],
+
+      object_spread_mutation: [
+        // Spreading then immediately overwriting all properties
+        { regex: /\{\s*\.\.\.\w+\s*,(?:\s*\w+\s*:\s*[^,}]+\s*,?){5,}\s*\}/gm },
+      ],
+
+      implicit_any_return: [
+        // Function that sometimes returns undefined implicitly
+        { regex: /function\s+\w+\s*\([^)]*\)(?::\s*\w+)?\s*\{[\s\S]*?return\s+\w[\s\S]*?^\s*\}$/gm },
+      ],
+
+      typeof_guard_misuse: [
+        // typeof x === "object" without null check
+        { regex: /typeof\s+\w+\s*===?\s*["']object["'](?!\s*&&\s*\w+\s*!==?\s*null)/g },
       ],
       // ── Java patterns ──
 
@@ -556,6 +721,29 @@ export class StaticAnalyser {
 
       system_exit_in_library: [
         { regex: /System\.exit\s*\(/g },
+      ],
+
+      synchronized_method: [
+        // synchronized on whole method (usually too coarse)
+        { regex: /public\s+synchronized\s+\w+\s+\w+\s*\(/g },
+      ],
+
+      string_equals_order: [
+        // variable.equals("literal") — risk of NPE, should be "literal".equals(variable)
+        { regex: /\w+\.equals\s*\(\s*["'][^"']*["']\s*\)/g },
+      ],
+
+      concatenation_in_logger: [
+        // logger.info("msg" + var) instead of logger.info("msg {}", var)
+        { regex: /logger\.\w+\s*\(\s*"[^"]*"\s*\+\s*\w+/g },
+        { regex: /log\.\w+\s*\(\s*"[^"]*"\s*\+\s*\w+/g },
+      ],
+
+      field_injection: [
+        // @Autowired on field (prefer constructor injection)
+        { regex: /@Autowired\s*\n\s*(?:private|protected)\s+\w+/g },
+        // @Inject on field
+        { regex: /@Inject\s*\n\s*(?:private|protected)\s+\w+/g },
       ],
 
       // ── C++ AI mistakes ──

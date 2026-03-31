@@ -78,6 +78,42 @@
       "fix": "Use auto for iterators, smart pointer factories, and casts. Spell out types when clarity matters.",
       "bad_example": "std::vector<std::pair<int, std::string>>::iterator it = map.begin();",
       "good_example": "auto it = map.begin();"
+    },
+    {
+      "id": "CPP008",
+      "name": "c_style_casts",
+      "severity": "warning",
+      "category": "robustness",
+      "description": "C-style casts are unchecked and dangerous. Use static_cast, dynamic_cast, const_cast, or reinterpret_cast for explicit intent.",
+      "bad_example": "int x = (int)floatValue;",
+      "good_example": "int x = static_cast<int>(floatValue);"
+    },
+    {
+      "id": "CPP009",
+      "name": "using_namespace_std",
+      "severity": "warning",
+      "category": "architecture",
+      "description": "'using namespace std;' pollutes the global namespace and can cause name collisions. Use explicit std:: prefix or targeted using declarations.",
+      "bad_example": "using namespace std;\nstring name;",
+      "good_example": "std::string name; // or: using std::string;"
+    },
+    {
+      "id": "CPP010",
+      "name": "raw_c_arrays",
+      "severity": "info",
+      "category": "idiom",
+      "description": "C-style arrays decay to pointers and lose size information. Use std::array for fixed-size, std::vector for dynamic.",
+      "bad_example": "int scores[100];",
+      "good_example": "std::array<int, 100> scores; // or std::vector<int> scores;"
+    },
+    {
+      "id": "CPP011",
+      "name": "raw_c_strings",
+      "severity": "info",
+      "category": "idiom",
+      "description": "const char* parameters are error-prone (null, no size info). Use std::string_view for read-only, std::string for owned.",
+      "bad_example": "void process(const char* name);",
+      "good_example": "void process(std::string_view name);"
     }
   ]
 }

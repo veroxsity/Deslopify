@@ -53,6 +53,33 @@
       "description": "std::endl flushes the buffer every time. Use '\\n' for newlines unless you specifically need a flush.",
       "detection": "Detect std::endl in output streams.",
       "fix": "Replace std::endl with '\\n'. Use std::endl only when you explicitly need to flush."
+    },
+    {
+      "id": "CPP_AP007",
+      "name": "macro_overuse",
+      "severity": "warning",
+      "category": "idiom",
+      "description": "#define macros for constants or simple functions. Modern C++ has constexpr, inline, and templates.",
+      "detection": "Detect #define for numeric constants or function-like macros.",
+      "fix": "Use constexpr for constants, inline functions or templates for function-like macros."
+    },
+    {
+      "id": "CPP_AP008",
+      "name": "goto_usage",
+      "severity": "error",
+      "category": "architecture",
+      "description": "goto creates spaghetti control flow. Almost always replaceable with structured alternatives.",
+      "detection": "Detect goto statements.",
+      "fix": "Replace with loops, early returns, RAII, or exceptions."
+    },
+    {
+      "id": "CPP_AP009",
+      "name": "printf_usage",
+      "severity": "info",
+      "category": "idiom",
+      "description": "C-style printf/sprintf in C++ code. Not type-safe, buffer overflow risk with sprintf.",
+      "detection": "Detect printf, sprintf, fprintf, snprintf calls.",
+      "fix": "Use std::format (C++20), std::cout, or fmt::format library."
     }
   ]
 }
