@@ -195,4 +195,41 @@ describe("StaticAnalyser", () => {
       expect(assertion).toBeDefined();
     });
   });
+
+  describe("security detections", () => {
+    it("detects SQL injection via string concatenation", () => {
+      const code = `db.query("SELECT * FROM users WHERE id = " + userId);`;
+      const issues = analyser.analyseCode("typescript", code);
+      const sql = issues.find((i) => i.type === "sql_injection");
+      expect(sql).toBeDefined();
+    });
+
+    it("detects innerHTML XSS vulnerability", () => {
+      const code = `element.innerHTML = userInput;`;
+      const issues = analyser.analyseCode("typescript", code);
+      const xss = issues.find((i) => i.type === "xss_vulnerability");
+      expect(xss).toBeDefined();
+    });
+
+    it("detects dangerouslySetInnerHTML", () => {
+      const code = `<div dangerouslySetInnerHTML={{ __html: content }} />`;
+      const issues = analyser.analyseCode("typescript", code);
+      const xss = issues.find((i) => i.type === "xss_vulnerability");
+      expect(xss).toBeDefined();
+    });
+
+    it("detects SQL injection via template literal", () => {
+      const code = "db.query(`SELECT * FROM users WHERE name = ${name}`);";
+      const issues = analyser.analyseCode("typescript", code);
+      const sql = issues.find((i) => i.type === "sql_injection");
+      expect(sql).toBeDefined();
+    });
+
+    it("detects database connection string hardcoded", () => {
+      const code = `const url = "postgresql://admin:pass@prod.db.com:5432/mydb";`;
+      const issues = analyser.analyseCode("typescript", code);
+      const hardcoded = issues.find((i) => i.type === "hardcoded_configuration");
+      expect(hardcoded).toBeDefined();
+    });
+  });
 });

@@ -214,6 +214,33 @@ export class StaticAnalyser {
         { regex: /["'](?:\/(?:usr|etc|var|home|opt)\/|[A-Z]:\\)[^"']+["']/g },
       ],
 
+      sql_injection: [
+        // String concatenation in SQL queries
+        { regex: /(?:query|execute|exec)\s*\(\s*["'`](?:SELECT|INSERT|UPDATE|DELETE|DROP)[^"'`]*["'`]\s*\+\s*\w+/gi },
+        // Template literal in SQL without parameterization
+        { regex: /(?:query|execute|exec)\s*\(\s*`(?:SELECT|INSERT|UPDATE|DELETE)[^`]*\$\{/gi },
+        // f-string in Python SQL
+        { regex: /(?:execute|cursor\.execute)\s*\(\s*f["'](?:SELECT|INSERT|UPDATE|DELETE)/gi },
+        // String format in SQL
+        { regex: /(?:query|execute)\s*\(\s*["'](?:SELECT|INSERT|UPDATE|DELETE)[^"']*%s/gi },
+      ],
+
+      xss_vulnerability: [
+        // innerHTML assignment with variable
+        { regex: /\.innerHTML\s*=\s*(?!["'`])/g },
+        // dangerouslySetInnerHTML in React
+        { regex: /dangerouslySetInnerHTML/g },
+        // document.write with variable
+        { regex: /document\.write\s*\(\s*(?!["'`])/g },
+      ],
+
+      insecure_random: [
+        // Math.random for security-sensitive operations
+        { regex: /Math\.random\s*\(\s*\)[\s\S]{0,50}(?:token|secret|key|password|hash|salt|nonce|id)/gi },
+        // Python random module for security
+        { regex: /random\.(?:randint|choice|random)\s*\([\s\S]{0,50}(?:token|secret|key|password)/gi },
+      ],
+
       copy_paste_duplication: [
         // Two functions with near-identical structure (same method calls in same order)
         // Heuristic: detect two function bodies that both call the same 3+ methods
@@ -313,15 +340,15 @@ export class StaticAnalyser {
       ],
 
       missing_return_type: [
-        // TypeScript function without return type
+        // TypeScript function without return type (no colon after closing paren before opening brace)
         ...(language === "typescript" ? [
           { regex: /(?:export\s+)?(?:async\s+)?function\s+\w+\s*\([^)]*\)\s*\{/g },
-          // Arrow function without return type
-          { regex: /const\s+\w+\s*=\s*(?:async\s+)?\([^)]*\)\s*=>/g },
+          // Arrow function assigned to const without return type annotation
+          { regex: /const\s+\w+\s*=\s*(?:async\s+)?\([^)]*\)\s*=>\s*\{/g },
         ] : []),
-        // Python function without type hints on return
+        // Python function without -> return annotation
         ...(language === "python" ? [
-          { regex: /def\s+\w+\s*\([^)]*\)\s*:/g },
+          { regex: /def\s+\w+\s*\([^)]*\)\s*:\s*$/gm },
         ] : []),
       ],
 
@@ -423,6 +450,10 @@ export class StaticAnalyser {
         { regex: /\.GetAwaiter\s*\(\s*\)\s*\.GetResult\s*\(\s*\)/g },
         // async void (except event handlers)
         { regex: /async\s+void\s+(?!On\w+|Handle\w+)\w+/g },
+        // Task.Delay(0) (should be Task.Yield or just await)
+        { regex: /Task\.Delay\s*\(\s*0\s*\)/g },
+        // Fire and forget (calling async without await)
+        { regex: /(?<!await\s)(?<!return\s)\w+Async\s*\([^)]*\)\s*;/g },
       ],
 
       nullable_reference_types: [
@@ -484,6 +515,10 @@ export class StaticAnalyser {
         { regex: /^\s*\w+\s*=\s*open\s*\(/gm },
         // Manual .close() calls
         { regex: /\.\s*close\s*\(\s*\)/g },
+        // acquire/release pattern without with
+        { regex: /\.acquire\s*\(\s*\)[\s\S]*?\.release\s*\(\s*\)/gm },
+        // socket/connection not in with
+        { regex: /^\s*\w+\s*=\s*(?:socket\.socket|sqlite3\.connect|psycopg2\.connect)\s*\(/gm },
       ],
 
       use_type_hints: [
@@ -602,6 +637,10 @@ export class StaticAnalyser {
         { regex: /async\s+function\s+\w+[^{]*\{(?:(?!try)[\s\S])*?await\s+/gm },
         // .then() without .catch()
         { regex: /\.then\s*\([^)]*\)(?!\s*\.catch)/g },
+        // Promise.all without try/catch
+        { regex: /Promise\.all\s*\(\s*\[[\s\S]*?\]\s*\)(?![\s\S]{0,60}catch)/g },
+        // Unhandled promise — calling async function without await or .catch
+        { regex: /(?<!await\s)(?<!return\s)\w+\s*\([^)]*\)\s*\.then\s*\(/g },
       ],
 
       use_strict_mode: [

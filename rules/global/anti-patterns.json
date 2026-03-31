@@ -158,6 +158,33 @@
       "description": "Functions without explicit return types rely on type inference, which can silently change when the implementation changes.",
       "detection": "Detect exported or public functions without return type annotations.",
       "fix": "Add explicit return types to all exported/public functions."
+    },
+    {
+      "id": "G016",
+      "name": "sql_injection",
+      "severity": "error",
+      "category": "robustness",
+      "description": "SQL queries built with string concatenation or template literals are vulnerable to SQL injection. Always use parameterized queries.",
+      "detection": "Detect string concatenation (+), template literals (${}), or f-strings in SQL query strings.",
+      "fix": "Use parameterized queries: db.query('SELECT * FROM users WHERE id = $1', [id])"
+    },
+    {
+      "id": "G017",
+      "name": "xss_vulnerability",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Setting innerHTML, using dangerouslySetInnerHTML, or document.write with untrusted data enables cross-site scripting attacks.",
+      "detection": "Detect innerHTML assignments with variables, dangerouslySetInnerHTML, document.write with non-literal arguments.",
+      "fix": "Use textContent for plain text. Use a sanitization library (DOMPurify) if HTML is required."
+    },
+    {
+      "id": "G018",
+      "name": "insecure_random",
+      "severity": "error",
+      "category": "robustness",
+      "description": "Math.random() and Python's random module are not cryptographically secure. Never use them for tokens, secrets, or security-sensitive values.",
+      "detection": "Detect Math.random() or random.randint() used near security-sensitive variable names.",
+      "fix": "Use crypto.randomUUID(), crypto.getRandomValues(), or Python's secrets module."
     }
   ]
 }
